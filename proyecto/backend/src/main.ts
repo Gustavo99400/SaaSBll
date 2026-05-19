@@ -3,9 +3,13 @@ import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { onRequest } from 'firebase-functions/v2/https';
 import express from 'express';
+import cors from 'cors';
 
 // Instanciamos el servidor de Express
 const expressServer = express();
+
+// Habilitamos CORS de forma global en Express para Cloud Functions
+expressServer.use(cors({ origin: true, credentials: true }));
 
 // Función para inicializar NestJS en Express
 const createNestServer = async (expressInstance: express.Express) => {
