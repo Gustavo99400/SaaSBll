@@ -36,10 +36,9 @@ export default function ChangePasswordPage() {
     try {
       // 1. Actualizamos la contraseña en Firebase Auth
       await updatePassword(user, password);
-      
-      // 2. Llamamos al backend para quitar la bandera `requiresPasswordChange`
       const token = await user.getIdToken();
-      await fetch('http://localhost:3000/auth/password-changed', {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      await fetch(`${API_URL}/auth/password-changed`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,

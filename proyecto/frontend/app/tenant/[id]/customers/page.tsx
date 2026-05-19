@@ -16,7 +16,7 @@ export default function CustomersPage({ params }: { params: Promise<{ id: string
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
 
-  const API_URL = 'http://localhost:3000';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
   useEffect(() => {
     let isMounted = true;

@@ -25,7 +25,7 @@ export default function SuperAdminPanel() {
   const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
   const [newTenantCredentials, setNewTenantCredentials] = useState<{email: string, password: string} | null>(null);
 
-  const API_URL = 'http://localhost:3000';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {

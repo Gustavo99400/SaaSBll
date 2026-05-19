@@ -26,8 +26,8 @@ export default function Verify2FAPage() {
 
     try {
       const token = await user.getIdToken();
-      
-      const res = await fetch('http://localhost:3000/auth/2fa/verify', {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const res = await fetch(`${API_URL}/auth/2fa/verify`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -59,7 +59,8 @@ export default function Verify2FAPage() {
     if (!user) return;
     try {
       const token = await user.getIdToken();
-      const res = await fetch('http://localhost:3000/auth/2fa/generate', {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const res = await fetch(`${API_URL}/auth/2fa/generate`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });

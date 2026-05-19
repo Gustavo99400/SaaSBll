@@ -20,7 +20,7 @@ export default function AppointmentsPage({ params }: { params: Promise<{ id: str
   const [date, setDate] = useState('');
   const [status, setStatus] = useState<'PENDING' | 'CONFIRMED' | 'CANCELLED'>('PENDING');
 
-  const API_URL = 'http://localhost:3000';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
   useEffect(() => {
     let isMounted = true;
