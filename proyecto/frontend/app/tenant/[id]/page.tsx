@@ -36,13 +36,29 @@ export default function TenantAdminPanel({ params }: { params: Promise<{ id: str
   };
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (!user) {
+        router.push('/login');
+        return;
+      }
+      try {
+        const tokenResult = await user.getIdTokenResult();
+        const role = tokenResult.claims.role;
+        const userTenantId = tokenResult.claims.tenantId;
+
+        // Solo permitir acceso si el rol es EMPRESA y el tenantId coincide
+        if (role !== 'EMPRESA' || userTenantId !== tenantId) {
+          console.warn('Acceso denegado: No tienes permisos para administrar esta empresa.');
+          await signOut(auth);
+          router.push('/login');
+        }
+      } catch (error) {
+        console.error("Error verificando permisos de empresa:", error);
         router.push('/login');
       }
     });
     return () => unsubscribe();
-  }, [router]);
+  }, [router, tenantId]);
 
   useEffect(() => {
     let isMounted = true;

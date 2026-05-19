@@ -405,7 +405,6 @@ export default function SuperAdminPanel() {
                     </td>
                     <td className="p-4 text-right space-x-2">
                       <button onClick={() => setEditingTenant(tenant)} className="px-3 py-1.5 bg-slate-800 text-slate-300 text-xs font-bold rounded hover:bg-slate-700 transition-colors">Editar</button>
-                      <Link href={`/tenant/${tenant.id}`} className="inline-block px-3 py-1.5 bg-rose-600 text-white text-xs font-bold rounded hover:bg-rose-500 transition-colors">Entrar</Link>
                       <button onClick={() => handleDeleteTenant(tenant.id)} className="px-3 py-1.5 bg-transparent border border-rose-900 text-rose-500 text-xs font-bold rounded hover:bg-rose-900/50 transition-colors">X</button>
                     </td>
                   </tr>

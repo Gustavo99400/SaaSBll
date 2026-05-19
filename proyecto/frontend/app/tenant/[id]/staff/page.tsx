@@ -2,9 +2,13 @@
 
 import { useEffect, useState, use } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { auth } from '@/app/lib/firebase';
+import { signOut } from 'firebase/auth';
 import { Staff } from '@/app/types';
 
 export default function StaffPage({ params }: { params: Promise<{ id: string }> }) {
+  const router = useRouter();
   const { id: tenantId } = use(params);
 
   const [staff, setStaff] = useState<Staff[]>([]);
@@ -16,6 +20,31 @@ export default function StaffPage({ params }: { params: Promise<{ id: string }> 
   const [phone, setPhone] = useState('');
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+      try {
+        const tokenResult = await user.getIdTokenResult();
+        const role = tokenResult.claims.role;
+        const userTenantId = tokenResult.claims.tenantId;
+
+        // Solo permitir acceso si el rol es EMPRESA y el tenantId coincide
+        if (role !== 'EMPRESA' || userTenantId !== tenantId) {
+          console.warn('Acceso denegado: No tienes permisos para administrar esta empresa.');
+          await signOut(auth);
+          router.push('/login');
+        }
+      } catch (error) {
+        console.error("Error verificando permisos de empresa:", error);
+        router.push('/login');
+      }
+    });
+    return () => unsubscribe();
+  }, [router, tenantId]);
 
   useEffect(() => {
     let isMounted = true;
