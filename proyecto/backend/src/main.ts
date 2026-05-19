@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { onRequest } from 'firebase-functions/v2/https';
-import * as express from 'express';
+import express from 'express';
 
 // Instanciamos el servidor de Express
 const expressServer = express();

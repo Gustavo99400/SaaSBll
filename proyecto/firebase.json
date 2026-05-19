@@ -11,7 +11,7 @@
         "dist"
       ],
       "predeploy": [
-        "npm --prefix \"$RESOURCE_DIR\" run build"
+        "npm --prefix backend run build"
       ]
     }
   ]
