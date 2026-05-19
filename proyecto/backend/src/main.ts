@@ -25,7 +25,7 @@ const createNestServer = async (expressInstance: express.Express) => {
 createNestServer(expressServer);
 
 // Exportamos la Cloud Function para producción
-export const api = onRequest({ cors: true, memory: '512MiB' }, expressServer);
+export const api = onRequest({ cors: true, memory: '512MiB', invoker: 'public' }, expressServer);
 
 // Soporte para desarrollo local (nest start)
 async function bootstrap() {
