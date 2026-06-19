@@ -1,0 +1,75 @@
+{
+  "functions": [
+    {
+      "codebase": "default",
+      "source": "backend",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firestore-debug.log"
+      ],
+      "predeploy": [
+        "npm --prefix backend run build"
+      ]
+    }
+  ],
+  "hosting": {
+    "site": "glamysaas",
+    "public": "frontend/out",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          {
+            "key": "Cross-Origin-Opener-Policy",
+            "value": "unsafe-none"
+          },
+          {
+            "key": "Cross-Origin-Embedder-Policy",
+            "value": "unsafe-none"
+          }
+        ]
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "/tenant/:id/staff",
+        "destination": "/tenant/sample/staff/index.html"
+      },
+      {
+        "source": "/tenant/:id/services",
+        "destination": "/tenant/sample/services/index.html"
+      },
+      {
+        "source": "/tenant/:id/customers",
+        "destination": "/tenant/sample/customers/index.html"
+      },
+      {
+        "source": "/tenant/:id/appointments",
+        "destination": "/tenant/sample/appointments/index.html"
+      },
+      {
+        "source": "/tenant/:id/branches/:branchId",
+        "destination": "/tenant/sample/branches/sample/index.html"
+      },
+      {
+        "source": "/tenant/:id/branches",
+        "destination": "/tenant/sample/branches/index.html"
+      },
+      {
+        "source": "/tenant/:id",
+        "destination": "/tenant/sample/index.html"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
