@@ -27,22 +27,61 @@
 
 ---
 
-## 📋 Tabla de Contenidos
+## Tabla de Contenidos
 
 1. [Descripción del Proyecto](#1-descripción-del-proyecto)
+   - [Características Clave](#características-clave)
+   - [Roles del Sistema](#roles-del-sistema)
 2. [Descripción de Interfaces (UI Showcase)](#2-descripción-de-interfaces-ui-showcase)
+   - [2.1 Panel SuperAdmin (Dashboard Global)](#21-panel-superadmin-dashboard-global)
+   - [2.2 Portal de Clientes (Wizard de Reservas)](#22-portal-de-clientes-wizard-de-reservas)
 3. [Tecnologías Utilizadas y Explicación de Librerías](#3-tecnologías-utilizadas-y-explicación-de-librerías)
+   - [3.1 Stack General](#31-stack-general)
+   - [3.2 Librerías del Backend (backend/package.json)](#32-librerías-del-backend-backendpackagejson)
+   - [3.3 Librerías del Frontend (frontend/package.json)](#33-librerías-del-frontend-frontendpackagejson)
 4. [Estructura de Directorios del Proyecto](#4-estructura-de-directorios-del-proyecto)
 5. [Instalación y Configuración del Backend (NestJS)](#5-instalación-y-configuración-del-backend-nestjs)
+   - [5.1 Prerrequisitos](#51-prerrequisitos)
+   - [5.2 Creación del Proyecto](#52-creación-del-proyecto)
+   - [5.3 Instalación de Dependencias](#53-instalación-de-dependencias)
+   - [5.4 Configuración de Firebase Admin SDK](#54-configuración-de-firebase-admin-sdk)
+   - [5.5 Ejecución en Entorno Local](#55-ejecución-en-entorno-local)
 6. [Instalación y Configuración del Frontend (Next.js)](#6-instalación-y-configuración-del-frontend-nextjs)
+   - [6.1 Creación del Proyecto](#61-creación-del-proyecto)
+   - [6.2 Instalación de Dependencias](#62-instalación-de-dependencias)
+   - [6.3 Configuración de Variables de Entorno](#63-configuración-de-variables-de-entorno)
 7. [Arquitectura de Seguridad (Custom Claims y Reglas de Firestore)](#7-arquitectura-de-seguridad-custom-claims-y-reglas-de-firestore)
+   - [7.1 Custom Claims (Firebase Auth)](#71-custom-claims-firebase-auth)
+   - [7.2 Reglas de Seguridad en Firestore (firestore.rules)](#72-reglas-de-seguridad-en-firestore-firestorerules)
+   - [7.3 Análisis Técnico del Modelo Multi-Tenant: Aislamiento Lógico vs. Físico](#73-análisis-técnico-del-modelo-multi-tenant-aislamiento-lógico-vs-físico)
 8. [Seguridad Avanzada: Autenticación de Doble Factor (2FA - TOTP)](#8-seguridad-avanzada-autenticación-de-doble-factor-2fa---totp)
+   - [8.1 Flujo Matemático de TOTP](#81-flujo-matemático-de-totp)
 9. [Modelo de Datos (NoSQL Firestore)](#9-modelo-de-datos-nosql-firestore)
+   - [9.1 Diagrama Entidad-Relación Lógico (Mermaid)](#91-diagrama-entidad-relación-lógico-mermaid)
+   - [9.2 Estructura Documental](#92-estructura-documental)
+     - [Colección: tenants](#colección-tenants)
+     - [Colección: appointments](#colección-appointments)
 10. [Endpoints de la API REST](#10-endpoints-de-la-api-rest)
+    - [🔐 Autenticación y 2FA](#-autenticación-y-2fa)
+    - [🏢 Tenants (Empresas)](#-tenants-empresas)
+    - [📍 Sucursales y Recursos](#-sucursales-y-recursos)
 11. [Componentes del Frontend y Flujo de Autenticación](#11-componentes-del-frontend-y-flujo-de-autenticación)
+    - [11.1 Diagrama de Secuencia de Autenticación y Redirección (Mermaid)](#111-diagrama-de-secuencia-de-autenticación-y-redirección-mermaid)
+    - [11.2 Mapeo de Vistas en el App Router](#112-mapeo-de-vistas-en-el-app-router)
 12. [Guía de Pruebas REST con SoapUI](#12-guía-de-pruebas-rest-con-soapui)
+    - [12.1 Parámetros de Configuración del Proyecto](#121-parámetros-de-configuración-del-proyecto)
 13. [Despliegue en la Nube (Hosting y Serverless Functions)](#13-despliegue-en-la-nube-hosting-y-serverless-functions)
+    - [13.1 Arquitectura de Despliegue (Física)](#131-arquitectura-de-despliegue-física)
+    - [13.2 Arquitectura Serverless](#132-arquitectura-serverless)
+    - [13.3 Despliegue del Backend (Cloud Functions)](#133-despliegue-del-backend-cloud-functions)
+    - [13.4 Despliegue del Frontend (Hosting)](#134-despliegue-del-frontend-hosting)
 14. [Práctica: Internacionalización (i18n) y Localización (l10n)](#14-práctica-internacionalización-i18n-y-localización-l10n)
+    - [14.1 Arquitectura del Sistema de Localización](#141-arquitectura-del-sistema-de-localización)
+    - [14.2 Detalle de Archivos Creados y Lógica Implementada](#142-detalle-de-archivos-creados-y-lógica-implementada)
+      - [A. Inicialización Core: i18n.ts](#a-inicialización-core-i18nts)
+      - [B. Contexto Global: LocaleContext.tsx](#b-contexto-global-localecontexttsx)
+      - [C. Integración en Vistas Principales](#c-integración-en-vistas-principales)
+    - [14.3 Guía de Calificación y Evidencia del Laboratorio (/test-i18n)](#143-guía-de-calificación-y-evidencia-del-laboratorio-test-i18n)
 15. [Rúbrica de Calificación (Práctica de i18n y l10n)](#15-rúbrica-de-calificación-práctica-de-i18n-y-l10n)
 16. [Conclusiones](#16-conclusiones)
 17. [Roadmap de Desarrollo Futuro](#17-roadmap-de-desarrollo-futuro)
@@ -61,7 +100,7 @@
 - **Autenticación Basada en Roles con Requisitos de Seguridad:** SuperAdmin (con 2FA obligatorio por TOTP), Empresa (acceso al panel de control específico del tenant) y Cliente (wizard interactivo de reservas).
 - **Operaciones en Cascada:** Al suspender o eliminar un tenant, el sistema propaga la acción a todos los recursos dependientes utilizando transacciones por lotes en la base de datos Firestore.
 
-### 👥 Roles del Sistema
+### Roles del Sistema
 
 | Rol | Distintivo | Acceso | Descripción |
 |-----|------------|--------|-------------|
@@ -110,7 +149,7 @@ En esta sección se detallan las vistas clave de la aplicación en producción.
 | `otplib` | ^13.4.0 | Generador y verificador de códigos TOTP de 6 dígitos para la seguridad del 2FA. |
 | `cors` | ^2.8.6 | Habilita el intercambio de recursos de origen cruzado para conectar el Frontend. |
 
-### 2.3 Librerías del Frontend (`frontend/package.json`)
+### 3.3 Librerías del Frontend (`frontend/package.json`)
 
 | Librería | Versión | Explicación |
 |----------|---------|-------------|
