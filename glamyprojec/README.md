@@ -1,8 +1,5 @@
 # Glamy SaaS — Sistema Multi-Tenant de Gestión para Salones de Belleza
 
-<p align="center">
-  <img src="https://1.bp.blogspot.com/-3wALNMake70/XK-07VtIngI/AAAAAAABOrY/n3X_ZJV5fGEpTs8ppMQvKk_yic7BfyBYQCLcBGAs/s1600/universidad-la-salle-logo.jpg" alt="Universidad La Salle" width="120"/>
-</p>
 
 <p align="center">
   <strong>UNIVERSIDAD LA SALLE</strong><br/>
@@ -25,10 +22,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Node.js-v22-green?style=for-the-badge&logo=node.js" alt="Node version"/>
-  <img src="https://img.shields.io/badge/NestJS-v11-red?style=for-the-badge&logo=nestjs" alt="NestJS version"/>
-  <img src="https://img.shields.io/badge/Next.js-v16-black?style=for-the-badge&logo=next.js" alt="NextJS version"/>
-  <img src="https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore-orange?style=for-the-badge&logo=firebase" alt="Firebase version"/>
+  <strong>Stack Tecnológico:</strong> Node.js (v22) | NestJS (v11) | Next.js (v16) | Firebase (Auth & Firestore)
 </p>
 
 ---
@@ -36,7 +30,7 @@
 ## 📋 Tabla de Contenidos
 
 1. [Descripción del Proyecto](#1-descripción-del-proyecto)
-2. [Galería de Interfaces (UI Showcase)](#2-galería-de-interfaces-ui-showcase)
+2. [Descripción de Interfaces (UI Showcase)](#2-descripción-de-interfaces-ui-showcase)
 3. [Tecnologías Utilizadas y Explicación de Librerías](#3-tecnologías-utilizadas-y-explicación-de-librerías)
 4. [Estructura de Directorios del Proyecto](#4-estructura-de-directorios-del-proyecto)
 5. [Instalación y Configuración del Backend (NestJS)](#5-instalación-y-configuración-del-backend-nestjs)
@@ -76,17 +70,19 @@
 
 ---
 
-## 2. Galería de Interfaces (UI Showcase)
+## 2. Descripción de Interfaces (UI Showcase)
 
 En esta sección se detallan las vistas clave de la aplicación en producción.
 
 ### 2.1 Panel SuperAdmin (Dashboard Global)
-![Panel de Control SuperAdmin](https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1000&q=80)
-*Vista de administración de tenants, métricas financieras y visualización analítica con Recharts.*
+* **Visualización de Métricas:** Panel interactivo para monitoreo de KPIs globales como total de ingresos y distribución de planes.
+* **Gráficos Estadísticos:** Uso de la librería Recharts para renderizar gráficos de barra dinámicos.
+* **Gestión de Tenants:** Tabla interactiva para dar de alta, modificar, suspender o eliminar tenants, con opción de exportación a CSV.
 
 ### 2.2 Portal de Clientes (Wizard de Reservas)
-![Wizard de Reservas de Clientes](https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1000&q=80)
-*Asistente paso a paso utilizado por clientes para seleccionar salón de belleza, sede, servicio, personal y horario.*
+* **Wizard de 6 Pasos:** Asistente interactivo guiado paso a paso para la programación de reservas.
+* **Selección Dinámica:** Permite al cliente seleccionar el salón de belleza (tenant), la sede, el servicio, el estilista/personal y el horario de atención.
+* **Confirmación e Historial:** Resumen final de la cita y acceso directo al historial de reservas del usuario.
 
 ---
 
