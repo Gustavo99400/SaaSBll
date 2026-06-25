@@ -46,7 +46,8 @@
 15. [Rúbrica de Calificación (Práctica de i18n y l10n)](#15-rúbrica-de-calificación-práctica-de-i18n-y-l10n)
 16. [Conclusiones](#16-conclusiones)
 17. [Roadmap de Desarrollo Futuro](#17-roadmap-de-desarrollo-futuro)
-18. [Enlaces de Interés](#18-enlaces-de-interés)
+18. [Glosario de Términos del Proyecto](#18-glosario-de-términos-del-proyecto)
+19. [Enlaces de Interés](#19-enlaces-de-interés)
 
 ---
 
@@ -299,6 +300,19 @@ service cloud.firestore {
 }
 ```
 
+### 7.3 Análisis Técnico del Modelo Multi-Tenant: Aislamiento Lógico vs. Físico
+
+El diseño de base de datos multi-tenant para sistemas SaaS plantea un dilema clásico entre el aislamiento físico y el aislamiento lógico de los datos:
+
+*   **Aislamiento Físico (Base de datos por Tenant):** Consiste en instanciar una base de datos o esquema físico independiente para cada cliente. Ofrece el máximo nivel de seguridad y facilita la personalización de esquemas individuales. Sin embargo, su escalabilidad en costos es deficiente (especialmente para planes de bajo costo) y añade una enorme sobrecarga operativa al realizar migraciones o actualizaciones globales del sistema.
+*   **Aislamiento Lógico (Base de datos y Esquemas Compartidos):** En este modelo, todos los tenants comparten una sola instancia de base de datos y las mismas colecciones/tablas. La procedencia y propiedad de la información se etiqueta mediante un campo identificador clave (`tenantId`). 
+
+**Decisión Arquitectónica de Glamy SaaS:**
+Se eligió el modelo de **Aislamiento Lógico** aprovechando la naturaleza de Google Cloud Firestore. Esto reduce los costos de infraestructura a cero en fases iniciales (modelo serverless pay-as-you-go) y centraliza el mantenimiento. 
+La seguridad y confidencialidad se garantizan aplicando un doble filtro obligatorio:
+1.  **En la API REST (Backend NestJS):** Mediante interceptores y guardias ([`auth.guard.ts`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/backend/src/auth/auth.guard.ts)) que impiden a un usuario autenticado con un `tenantId` realizar consultas o modificaciones de otro tenant.
+2.  **En las Reglas de Firestore (Base de Datos):** Reglas declarativas que validan a nivel de motor de datos que los tokens JWT de Firebase contengan el `tenantId` coincidente antes de otorgar acceso de lectura o escritura directamente desde el SDK cliente.
+
 ---
 
 ## 8. Seguridad Avanzada: Autenticación de Doble Factor (2FA - TOTP)
@@ -468,20 +482,53 @@ Para automatizar los tokens dinámicos en SoapUI:
 
 ## 13. Despliegue en la Nube (Hosting y Serverless Functions)
 
-### 13.1 Arquitectura Serverless
+### 13.1 Arquitectura de Despliegue (Física)
+
+El sistema está completamente integrado y distribuido dentro de la nube de Google Cloud Platform (GCP) a través de Firebase, siguiendo un modelo de infraestructura sin servidor (Serverless). A continuación se muestra la topología de despliegue físico de la aplicación:
+
+```mermaid
+flowchart TD
+    subgraph ClientSpace["Espacio del Cliente (Browser)"]
+        Browser["Navegador del Usuario (React/Next.js Client)"]
+        Authenticator["App de Autenticación (Google Authenticator TOTP)"]
+    end
+
+    subgraph FirebaseCloud["Ecosistema Cloud (Firebase/GCP)"]
+        CDN["Firebase Hosting (Edge CDN)"]
+        AuthService["Firebase Authentication (Servicio JWT / Claims)"]
+        
+        subgraph ComputeInstance["Capa de Cómputo (Serverless)"]
+            Functions["Cloud Functions v2 (NestJS Backend API)"]
+        end
+        
+        subgraph DatabaseInstance["Capa de Persistencia"]
+            Firestore["Google Cloud Firestore (NoSQL Document DB)"]
+        end
+    end
+
+    Browser -->|1. Petición de Assets Estáticos| CDN
+    Browser -->|2. Solicitud de Auth / ID Token| AuthService
+    Browser -->|3. Consume REST API (Bearer JWT)| Functions
+    Browser -->|4. Consultas Directas SDK (Reglas Seguridad)| Firestore
+    Authenticator -.->|Código de 6 dígitos| Browser
+    Functions -->|Valida Token y Claims| AuthService
+    Functions -->|Acceso a Datos (Admin SDK)| Firestore
+```
+
+### 13.2 Arquitectura Serverless
 El ecosistema completo se aloja en los servidores globales de Google Cloud Platform (GCP) mediante la CLI de Firebase:
 - **Backend:** NestJS empaquetado como Firebase Cloud Functions v2 (HTTP Serverless).
 - **Frontend:** Next.js exportado estáticamente y servido en Firebase Hosting CDN.
 - **Base de Datos:** Cloud Firestore.
 
-### 13.2 Despliegue del Backend (Cloud Functions)
+### 13.3 Despliegue del Backend (Cloud Functions)
 ```bash
 cd backend
 npm run build
 firebase deploy --only functions
 ```
 
-### 13.3 Despliegue del Frontend (Hosting)
+### 13.4 Despliegue del Frontend (Hosting)
 ```bash
 cd frontend
 npm run build
@@ -606,7 +653,22 @@ Planificación de mejoras para escalar el ecosistema Glamy SaaS:
 
 ---
 
-## 18. Enlaces de Interés
+## 18. Glosario de Términos del Proyecto
+
+Definición de conceptos clave de arquitectura de software e ingeniería web aplicados en esta plataforma:
+
+*   **SaaS (Software as a Service):** Modelo de distribución de software donde las aplicaciones y los datos son alojados en servidores en la nube y accedidos a través del navegador.
+*   **Multi-Tenancy (Multi-inquilinato):** Arquitectura de software en la que una única instancia física del sistema atiende a múltiples clientes (inquilinos/tenants), asegurando un aislamiento total de sus datos.
+*   **Custom Claims (Atributos Personalizados):** Propiedades personalizadas inyectadas en la carga útil de los tokens JWT de Firebase para gestionar roles e identificadores de empresas de forma descentralizada y segura.
+*   **TOTP (Time-Based One-Time Password):** Algoritmo estándar (RFC 6238) que genera códigos temporales dinámicos de un solo uso basados en una clave secreta y la hora del sistema.
+*   **i18n (Internacionalización):** Conjunto de prácticas de desarrollo de software destinadas a adaptar una plataforma a múltiples idiomas y regiones sin realizar cambios estructurales en el código.
+*   **l10n (Localización):** Adaptación del sistema internacionalizado a una zona geográfica o cultura específica (formateo local de divisas, zonas horarias, fechas y números).
+*   **Hydration (Hidratación):** Fase del ciclo de vida en Next.js donde el motor de React del cliente conecta escuchadores de eventos al HTML estático pre-renderizado por el servidor.
+*   **Serverless (Arquitectura sin Servidor):** Modelo de computación en la nube donde el proveedor escala y administra dinámicamente la asignación de recursos, facturando únicamente por los milisegundos de cómputo consumidos.
+
+---
+
+## 19. Enlaces de Interés
 
 - **Frontend en Producción (Firebase):** https://glamysaas.web.app
 - **Laboratorio de Pruebas de i18n/l10n:** http://localhost:3000/test-i18n
