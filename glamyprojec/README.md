@@ -38,7 +38,8 @@
 8. [Pruebas con SoapUI](#8-pruebas-con-soapui)
 9. [Despliegue en Firebase](#9-despliegue-en-firebase)
 10. [Conclusiones](#10-conclusiones)
-11. [Rúbrica de Autoevaluación](#11-rúbrica-de-autoevaluación)
+11. [Práctica: Internacionalización (i18n) y Localización (l10n)](#11-práctica-internacionalización-i18n-y-localización-l10n)
+12. [Rúbrica de Calificación (Práctica de i18n y l10n)](#12-rúbrica-de-calificación-práctica-de-i18n-y-l10n)
 
 ---
 
@@ -112,6 +113,9 @@
 | `@tailwindcss/postcss` | ^4 | Plugin de PostCSS para integrar TailwindCSS v4 en el pipeline de build de Next.js. |
 | `typescript` | ^5 | Superset tipado de JavaScript. Permite definir interfaces (Tenant, Branch, Appointment) y detectar errores en tiempo de compilación. |
 | `eslint` / `eslint-config-next` | ^9 / 16.2.6 | Herramientas de linting que analizan el código en busca de errores, malas prácticas y estilos inconsistentes. |
+| `i18next` | ^23.14.0 | Motor principal de internacionalización (i18n) para gestionar traducción y recursos de idioma. |
+| `react-i18next` | ^14.1.0 | Adaptador para integrar i18next de forma nativa en React mediante hooks de renderizado. |
+| `date-fns` | ^3.6.0 | Colección de utilidades modulares para formatear, comparar y localizar fechas de acuerdo a la cultura activa. |
 
 ---
 
@@ -882,44 +886,83 @@ Para el frontend en producción, las variables de entorno de Firebase se incluye
 
 ## 11. Práctica: Internacionalización (i18n) y Localización (l10n)
 
-Se ha integrado un sistema completo de internacionalización (i18n) y localización (l10n) en el frontend de **Glamy SaaS** para permitir que la plataforma sea accesible de forma multiidioma y multirregión. El sistema soporta **4 idiomas**: Español (`es`), Inglés (`en`), Portugués (`pt`) y Francés (`fr`).
+Se ha desarrollado un ecosistema completo de **Internacionalización (i18n)** y **Localización (l10n)** en el cliente para el frontend de **Glamy SaaS**. Esto permite adaptar dinámicamente toda la experiencia de usuario (incluyendo traducción de etiquetas, validación de formularios, visualización de alertas, formato de divisas regionales, fechas y números) a 4 lenguajes y regiones distintas:
+- 🇪🇸 **Español (`es`)** — Divisa: Soles Peruanos (`PEN`), formato: `S/. 150.00`
+- 🇺🇸 **Inglés (`en`)** — Divisa: Dólares Americanos (`USD`), formato: `$150.00`
+- 🇧🇷 **Portugués (`pt`)** — Divisa: Reales Brasileños (`BRL`), formato: `R$ 150,00`
+- 🇫🇷 **Francés (`fr`)** — Divisa: Euros (`EUR`), formato: `150,00 €`
 
-### 11.1 Librerías Utilizadas
+### 11.1 Arquitectura del Sistema de Localización
 
-1. **`i18next` & `react-i18next` (i18n)**: Usadas para el motor de traducción de textos en la interfaz de usuario. Almacena diccionarios con claves estructuradas para navegación, formularios, tablas, modales y mensajes.
-2. **`date-fns` (l10n)**: Librería utilizada para dar formato localizado a las fechas en función del idioma seleccionado (`es`, `en-US`, `pt`, `fr`).
-3. **`Intl` API (l10n)**: API nativa de JavaScript utilizada para formatear números y divisas de acuerdo a la región:
-   - **Español (`es`)**: Moneda en Soles Peruanos (`PEN`), formato: `S/. 150.00`
-   - **Inglés (`en`)**: Moneda en Dólares Estadounidenses (`USD`), formato: `$150.00`
-   - **Portugués (`pt`)**: Moneda en Reales Brasileños (`BRL`), formato: `R$ 150,00`
-   - **Francés (`fr`)**: Moneda en Euros (`EUR`), formato: `150,00 €`
+La traducción y localización se implementaron en el lado del cliente utilizando un patrón de diseño desacoplado. A continuación se presenta el diagrama de flujo arquitectónico de las dependencias y el estado global:
 
-### 11.2 Estructura de Archivos Creados y Modificados
+```mermaid
+flowchart TD
+    i18nConfig[i18n.ts Dictionaries] -->|Inicializa recursos ES/EN/PT/FR| i18nEngine[i18next Engine]
+    i18nEngine -->|Provee t hook| LocaleCtx[LocaleContext.tsx Provider]
+    IntlAPI[Browser Intl API] -->|Formatea Divisa y Números| LocaleCtx
+    DateFns[date-fns/locale] -->|Formatea Fechas localizadas| LocaleCtx
+    
+    LocaleCtx -->|Preferencia de idioma guardada en localStorage| ClientState[LocaleContext State]
+    
+    ClientState -->|Idioma + Formateadores| SuperAdmin[SuperAdmin Panel]
+    ClientState -->|Idioma + Formateadores| TenantAdmin[Tenant Admin Panel]
+    ClientState -->|Idioma + Formateadores| Customer[Customer Dashboard]
+    ClientState -->|Idioma + Formateadores| TestLab[Lab de Pruebas /test-i18n]
+```
 
-- **[`i18n.ts`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/lib/i18n.ts) [NEW]**: Archivo de configuración central de `i18next` que inicializa el soporte de React y define todos los diccionarios de traducción en los 4 idiomas.
-- **[`LocaleContext.tsx`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/lib/LocaleContext.tsx) [NEW]**: Proveedor de contexto React que maneja el idioma activo, persiste la preferencia en `localStorage`, inicializa i18n en el cliente y expone los métodos formateadores `formatCurrency()`, `formatDate()` y `formatNumber()`.
-- **[`layout.tsx`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/layout.tsx) [MODIFY]**: Se envolvió la raíz de la aplicación con `LocaleProvider` para dotar de traducción y localización a todo el ecosistema de vistas.
-- **[`page.tsx`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/page.tsx) (SuperAdmin) [MODIFY]**: Se tradujeron los elementos de la interfaz (KPIs, formularios, directorio, modales, alertas y confirmaciones) y se añadió el componente selector de idioma en la barra de navegación. Los precios de los planes SaaS se localizan dinámicamente según la divisa seleccionada.
-- **[`page.tsx`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/tenant/[id]/page.tsx) (Tenant Admin) [MODIFY]**: Se tradujo la barra de navegación del Tenant (Clientes, Personal, Servicios, Citas, Salir) y el formulario de creación de sedes, integrando el selector de idiomas en el header principal.
-- **[`page.tsx`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/test-i18n/page.tsx) [NEW]**: Página de laboratorio accesible en la ruta `/test-i18n` para realizar pruebas dinámicas y calificar el funcionamiento de las traducciones y formatos regionales.
+### 11.2 Detalle de Archivos Creados y Lógica Implementada
 
-### 11.3 Flujo de Funcionamiento (Cliente)
+#### A. Inicialización Core: [`i18n.ts`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/lib/i18n.ts)
+Este archivo gestiona las plantillas de traducción estructuradas en formato JSON. Posee claves anidadas para:
+- `nav`: Menú de navegación, roles de usuario, botones de cerrar sesión y redirección.
+- `kpi`: Nombres de métricas principales e indicador del gráfico distributivo.
+- `form`: Etiquetas de formularios de creación (razón social, identificadores fiscales, direcciones, horarios).
+- `table`: Encabezados de directorios y listas.
+- `messages`: Notificaciones del sistema, validaciones dinámicas y confirmaciones críticas de borrado.
+- `customer`: Pasos del asistente del cliente y textos informativos.
 
-Como la aplicación Next.js usa exportación estática (`output: 'export'`), toda la negociación de idiomas se efectúa del lado del cliente:
-1. Al cargar la página, se lee la preferencia guardada en `localStorage` (bajo la clave `glamy_lang`). Si no existe, se define Español (`es`) por defecto.
-2. El selector de la navbar permite cambiar el estado del contexto.
-3. El contexto actualiza `i18n` para cambiar todos los textos estáticos dinámicamente y propaga los formateadores locales para actualizar fechas, números y monedas al instante.
+#### B. Contexto Global: [`LocaleContext.tsx`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/lib/LocaleContext.tsx)
+Proporciona el estado del idioma activo y encapsula el formateo dinámico:
+```typescript
+// Lógica interna de localización de monedas en LocaleContext
+const formatCurrency = (value: number): string => {
+  let currency = 'PEN';
+  let currencyLocale = 'es-PE';
+  if (locale === 'en') { currency = 'USD'; currencyLocale = 'en-US'; }
+  else if (locale === 'pt') { currency = 'BRL'; currencyLocale = 'pt-BR'; }
+  else if (locale === 'fr') { currency = 'EUR'; currencyLocale = 'fr-FR'; }
+  
+  return new Intl.NumberFormat(currencyLocale, {
+    style: 'currency',
+    currency: currency,
+  }).format(value);
+};
+```
 
-### 11.4 Ejecución de Pruebas de i18n y l10n
+#### C. Integración en Vistas Principales
+- **[`layout.tsx`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/layout.tsx)**: Se inyectó el `LocaleProvider` a nivel raíz para evitar problemas de sincronía en el renderizado y envolver los componentes del cliente.
+- **[`page.tsx`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/page.tsx) (SuperAdmin)**: Integra las traducciones para todos los botones de estado, modales flotantes y formateo dinámico de precios de planes en el desplegable. Incluye un interruptor de 4 botones premium para el control de idiomas.
+- **[`page.tsx`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/tenant/[id]/page.tsx) (Tenant Admin)**: Traduce las secciones administrativas principales de gestión de sedes e integra el selector de idiomas en el panel superior.
+- **[`page.tsx`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/customer/dashboard/page.tsx) (Customer Dashboard)**: Traduce al 100% la interfaz del cliente que realiza reservas, automatizando la traducción de los 6 pasos del asistente, así como la visualización localizada de precios y fechas en el historial de reservas.
 
-Para realizar las pruebas y evidenciar el laboratorio:
-1. Inicie la aplicación en modo desarrollo con `npm run dev` en el directorio `frontend/`.
-2. Navegue a la ruta de pruebas: **http://localhost:3000/test-i18n**.
-3. Haga clic en los botones de selección de idioma (**Español**, **English**, **Português**, **Français**) y verifique que:
-   - El texto del card "Traducción" cambie de idioma.
-   - El formato de la fecha de hoy se adapte a cada convención (ej. `25 de junio de 2026` vs `June 25, 2026`).
-   - La divisa cambie de símbolo y formato de separación (ej. `S/. 1,500.50` vs `1 500,50 €`).
-   - El separador de millares y decimales de los números cambie correspondientemente.
+---
+
+### 11.3 Guía de Calificación y Evidencia del Laboratorio (`/test-i18n`)
+
+Para facilitar la revisión por parte del profesor, se diseñó la ruta interactiva `/test-i18n` ([`test-i18n/page.tsx`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/test-i18n/page.tsx)). Al acceder en modo local u online y alternar entre los 4 idiomas, se actualizan dinámicamente cuatro aspectos fundamentales:
+
+| Idioma Seleccionado | 1. Traducción UI (i18n) | 2. Localización Fecha (l10n) | 3. Moneda Regional (l10n) | 4. Formato Numérico (l10n) |
+|--------------------|-------------------------|------------------------------|----------------------------|----------------------------|
+| **Español (ES)** | Texto traducido al español | `25 de junio de 2026` | `S/. 1,500.50` | `9,876,543` |
+| **English (EN)** | Translated text to English | `June 25, 2026` | `$1,500.50` | `9,876,543` |
+| **Português (PT)** | Texto traduzido para português | `25 de junho de 2026` | `R$ 1.500,50` | `9.876.543` |
+| **Français (FR)** | Texte traduit en français | `25 juin 2026` | `1 500,50 €` | `9 876 543` |
+
+> [!TIP]
+> **Pasos para evidenciar:**
+> 1. Levante el proyecto en desarrollo mediante `npm run dev` en el directorio `frontend`.
+> 2. Visite la ruta: **http://localhost:3000/test-i18n** y verifique la actualización reactiva instantánea al interactuar con las tarjetas del laboratorio.
 
 ---
 
@@ -927,19 +970,19 @@ Para realizar las pruebas y evidenciar el laboratorio:
 
 | Ítem | Descripción | Puntaje | Check |
 |------|-------------|---------|-------|
-| **l10n** | Instalación, configuración de librería `date-fns` y API `Intl` para localización de fechas, monedas y números. | 4 | X |
-| **i18n** | Instalación, configuración de librería `i18next` y `react-i18next` con 4 idiomas (ES, EN, PT, FR) para internacionalización. | 4 | X |
-| **Prueba de l10n** | Prueba de localización y formateo de fechas y monedas desde el FrontEnd en `/test-i18n`. | 4 | X |
-| **Prueba de i18n** | Prueba de traducción dinámica de UI y alertas en el FrontEnd en los paneles SuperAdmin y Tenant. | 4 | X |
-| **Informe** | Detalle técnico completo de la práctica de i18n y l10n redactado en el `README.md` (Sección 11). | 4 | X |
+| **l10n (Localización)** | Instalación y configuración de la librería `date-fns` y el uso nativo de `Intl` para formatear fechas, divisas locales y separadores de números en el cliente. | 4 | X |
+| **i18n (Internacionalización)** | Configuración de `i18next` y `react-i18next` gestionando diccionarios completos en Español, Inglés, Portugués y Francés. | 4 | X |
+| **Prueba de l10n** | Validación desde el Frontend de formatos monetarios (`S/.`, `$`, `R$`, `€`) y fechas en la ruta `/test-i18n` y pantallas del sistema. | 4 | X |
+| **Prueba de i18n** | Pruebas dinámicas de cambio de idioma en navbar, formularios, modales, alertas y confirmaciones en los paneles administrativos y de cliente. | 4 | X |
+| **Informe** | Inclusión y desglose detallado de toda la práctica en este archivo `README.md` (Sección 11 y 12). | 4 | X |
 | **Total** | | **20** | |
 
 ---
 
 ## Enlaces
 
-- **Frontend (producción):** https://glamysaas.web.app
-- **Página de Pruebas i18n/l10n:** http://localhost:3000/test-i18n
-- **Repositorio GitHub:** https://github.com/Gustavo99400/SaaSBll.git
-- **Proyecto Firebase:** saasrcb
+- **Frontend en Producción (Firebase):** https://glamysaas.web.app
+- **Laboratorio de Pruebas de i18n/l10n:** http://localhost:3000/test-i18n
+- **Repositorio GitHub de Avance:** https://github.com/Gustavo99400/SaaSBll.git
+- **Proyecto de Consola Firebase:** saasrcb
 
