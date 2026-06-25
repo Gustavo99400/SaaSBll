@@ -674,8 +674,9 @@ Para facilitar la revisión por parte del profesor, se diseñó la ruta interact
 
 > [!TIP]
 > **Pasos para evidenciar:**
-> 1. Levante el proyecto en desarrollo mediante `npm run dev` en el directorio `frontend`.
-> 2. Visite la ruta: **http://localhost:3000/test-i18n** y verifique la actualización reactiva instantánea al interactuar con las tarjetas del laboratorio.
+> 1. Visite la URL del laboratorio en producción: **[https://glamysaas.web.app/test-i18n](https://glamysaas.web.app/test-i18n)**.
+> 2. Interactúe con los botones de idioma (**Español**, **English**, **Português**, **Français**) y verifique la actualización reactiva instantánea de los textos, fechas, monedas y formatos numéricos.
+> *(Nota: Para pruebas en entorno local, puede levantar el servidor con `npm run dev` en `frontend/` y entrar a `http://localhost:3000/test-i18n`)*.
 
 ---
 
