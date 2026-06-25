@@ -36,18 +36,23 @@
 ## 📋 Tabla de Contenidos
 
 1. [Descripción del Proyecto](#1-descripción-del-proyecto)
-2. [Tecnologías Utilizadas y Explicación de Librerías](#2-tecnologías-utilizadas-y-explicación-de-librerías)
-3. [Instalación y Configuración del Backend (NestJS)](#3-instalación-y-configuración-del-backend-nestjs)
-4. [Instalación y Configuración del Frontend (Next.js)](#4-instalación-y-configuración-del-frontend-nextjs)
-5. [Modelo de Datos](#5-modelo-de-datos)
-6. [Endpoints de la API REST](#6-endpoints-de-la-api-rest)
-7. [Componentes del Frontend](#7-componentes-del-frontend)
-8. [Pruebas con SoapUI](#8-pruebas-con-soapui)
-9. [Despliegue en Firebase](#9-despliegue-en-firebase)
-10. [Conclusiones](#10-conclusiones)
-11. [Práctica: Internacionalización (i18n) y Localización (l10n)](#11-práctica-internacionalización-i18n-y-localización-l10n)
-12. [Rúbrica de Calificación (Práctica de i18n y l10n)](#12-rúbrica-de-calificación-práctica-de-i18n-y-l10n)
-13. [Enlaces de Interés](#13-enlaces-de-interés)
+2. [Galería de Interfaces (UI Showcase)](#2-galería-de-interfaces-ui-showcase)
+3. [Tecnologías Utilizadas y Explicación de Librerías](#3-tecnologías-utilizadas-y-explicación-de-librerías)
+4. [Estructura de Directorios del Proyecto](#4-estructura-de-directorios-del-proyecto)
+5. [Instalación y Configuración del Backend (NestJS)](#5-instalación-y-configuración-del-backend-nestjs)
+6. [Instalación y Configuración del Frontend (Next.js)](#6-instalación-y-configuración-del-frontend-nextjs)
+7. [Arquitectura de Seguridad (Custom Claims y Reglas de Firestore)](#7-arquitectura-de-seguridad-custom-claims-y-reglas-de-firestore)
+8. [Seguridad Avanzada: Autenticación de Doble Factor (2FA - TOTP)](#8-seguridad-avanzada-autenticación-de-doble-factor-2fa---totp)
+9. [Modelo de Datos (NoSQL Firestore)](#9-modelo-de-datos-nosql-firestore)
+10. [Endpoints de la API REST](#10-endpoints-de-la-api-rest)
+11. [Componentes del Frontend y Flujo de Autenticación](#11-componentes-del-frontend-y-flujo-de-autenticación)
+12. [Guía de Pruebas REST con SoapUI](#12-guía-de-pruebas-rest-con-soapui)
+13. [Despliegue en la Nube (Hosting y Serverless Functions)](#13-despliegue-en-la-nube-hosting-y-serverless-functions)
+14. [Práctica: Internacionalización (i18n) y Localización (l10n)](#14-práctica-internacionalización-i18n-y-localización-l10n)
+15. [Rúbrica de Calificación (Práctica de i18n y l10n)](#15-rúbrica-de-calificación-práctica-de-i18n-y-l10n)
+16. [Conclusiones](#16-conclusiones)
+17. [Roadmap de Desarrollo Futuro](#17-roadmap-de-desarrollo-futuro)
+18. [Enlaces de Interés](#18-enlaces-de-interés)
 
 ---
 
@@ -71,9 +76,23 @@
 
 ---
 
-## 2. Tecnologías Utilizadas y Explicación de Librerías
+## 2. Galería de Interfaces (UI Showcase)
 
-### 2.1 Stack General
+En esta sección se detallan las vistas clave de la aplicación en producción.
+
+### 2.1 Panel SuperAdmin (Dashboard Global)
+![Panel de Control SuperAdmin](https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1000&q=80)
+*Vista de administración de tenants, métricas financieras y visualización analítica con Recharts.*
+
+### 2.2 Portal de Clientes (Wizard de Reservas)
+![Wizard de Reservas de Clientes](https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1000&q=80)
+*Asistente paso a paso utilizado por clientes para seleccionar salón de belleza, sede, servicio, personal y horario.*
+
+---
+
+## 3. Tecnologías Utilizadas y Explicación de Librerías
+
+### 3.1 Stack General
 - **Backend Framework:** NestJS (v11) con adaptador Express.
 - **Frontend Framework:** Next.js (v16) con App Router y renderizado híbrido.
 - **Runtime:** Node.js (v22).
@@ -81,7 +100,7 @@
 - **Autenticación:** Firebase Authentication con Custom Claims.
 - **Estilos:** TailwindCSS (v4) con PostCSS.
 
-### 2.2 Librerías del Backend (`backend/package.json`)
+### 3.2 Librerías del Backend (`backend/package.json`)
 
 | Librería | Versión | Explicación |
 |----------|---------|-------------|
@@ -108,13 +127,54 @@
 
 ---
 
-## 3. Instalación y Configuración del Backend (NestJS)
+## 4. Estructura de Directorios del Proyecto
 
-### 3.1 Prerrequisitos
+El proyecto está organizado en una arquitectura de monorrepositorio dividido en `backend/` y `frontend/`.
+
+```
+glamyprojec/
+├── firebase.json               # Configuración del despliegue serverless de Firebase
+├── .firebaserc                 # Configuración del proyecto de destino en Firebase
+├── backend/                    # --- BACKEND (NestJS API) ---
+│   ├── firebase-debug.log
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── src/
+│       ├── main.ts             # Punto de arranque o exportación de la Cloud Function
+│       ├── app.module.ts       # Módulo raíz de la aplicación
+│       ├── auth/               # Guardias de seguridad y TOTP
+│       │   ├── auth.guard.ts   # Verificación JWT de Firebase
+│       │   └── auth.controller.ts
+│       ├── firebase/           # Módulo de inicialización de Firebase Admin
+│       └── tenants/            # CRUD de Tenants con eliminación en cascada
+└── frontend/                   # --- FRONTEND (Next.js Application) ---
+    ├── package.json
+    ├── postcss.config.mjs
+    ├── tsconfig.json
+    ├── app/
+    │   ├── layout.tsx          # Componente raíz con el LocaleProvider
+    │   ├── page.tsx            # Dashboard de SuperAdmin (traducido)
+    │   ├── globals.css         # Configuración de TailwindCSS v4
+    │   ├── customer/           # Portal del Cliente y Asistente de Reservas
+    │   ├── login/              # Control de acceso y 2FA OTP
+    │   ├── tenant/             # Panel del Tenant / Sucursales
+    │   ├── test-i18n/          # Página del Laboratorio de traducción e i18n
+    │   ├── types/              # Interfaces y modelos compartidos
+    │   └── lib/
+    │       ├── firebase.ts     # Inicialización del SDK cliente
+    │       ├── i18n.ts         # Diccionarios multilenguaje (ES, EN, PT, FR)
+    │       └── LocaleContext.tsx # Contexto regional (moneda, fecha, número)
+```
+
+---
+
+## 5. Instalación y Configuración del Backend (NestJS)
+
+### 5.1 Prerrequisitos
 - Node.js 22 o superior e instalador de paquetes `npm`.
 - Proyecto Firebase activo con Firestore y Auth habilitados.
 
-### 3.2 Creación del Proyecto
+### 5.2 Creación del Proyecto
 ```bash
 # Instalar NestJS CLI globalmente
 npm i -g @nestjs/cli
@@ -124,12 +184,12 @@ nest new backend --no-spec
 cd backend
 ```
 
-### 3.3 Instalación de Dependencias
+### 5.3 Instalación de Dependencias
 ```bash
 npm install firebase-admin firebase-functions class-validator class-transformer @nestjs/mapped-types cors @types/cors otplib @nestjs/platform-express
 ```
 
-### 3.4 Configuración de Firebase Admin SDK
+### 5.4 Configuración de Firebase Admin SDK
 
 > [!WARNING]
 > Nunca exponga ni suba al control de versiones el archivo de llaves privadas `firebase-config.json`.
@@ -164,7 +224,7 @@ export class FirebaseService implements OnModuleInit {
 }
 ```
 
-### 3.5 Ejecución en Entorno Local
+### 5.5 Ejecución en Entorno Local
 ```bash
 npm run start:dev
 # La API se levantará en: http://localhost:3000
@@ -172,20 +232,20 @@ npm run start:dev
 
 ---
 
-## 4. Instalación y Configuración del Frontend (Next.js)
+## 6. Instalación y Configuración del Frontend (Next.js)
 
-### 4.1 Creación del Proyecto
+### 6.1 Creación del Proyecto
 ```bash
 npx create-next-app@latest frontend --typescript --eslint --tailwind --app --src-dir=false
 cd frontend
 ```
 
-### 4.2 Instalación de Dependencias
+### 6.2 Instalación de Dependencias
 ```bash
 npm install firebase lucide-react recharts i18next react-i18next date-fns
 ```
 
-### 4.3 Configuración de Variables de Entorno
+### 6.3 Configuración de Variables de Entorno
 Cree un archivo **`.env.local`** en la raíz de `frontend/` e ingrese los datos de su Web App de Firebase:
 ```env
 NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSy..."
@@ -197,31 +257,76 @@ NEXT_PUBLIC_FIREBASE_APP_ID="1:657751849225:web:0230e020781"
 NEXT_PUBLIC_API_URL="http://localhost:3000"
 ```
 
-### 4.4 Configuración de Exportación Estática
-Para realizar el despliegue en Firebase Hosting como sitio web estático optimizado, configure el compilador en **`next.config.ts`**:
-```typescript
-import type { NextConfig } from "next";
+---
 
-const nextConfig: NextConfig = {
-  output: process.env.NODE_ENV === 'production' ? 'export' : undefined,
-  images: {
-    unoptimized: true,
-  },
-  env: {
-    FIREBASE_WEBAPP_CONFIG: process.env.FIREBASE_WEBAPP_CONFIG || '',
-  },
-};
+## 7. Arquitectura de Seguridad (Custom Claims y Reglas de Firestore)
 
-export default nextConfig;
+La seguridad y el aislamiento multi-tenant de Glamy SaaS se sostienen sobre dos pilares: los **Custom Claims en Firebase Authentication** para control de roles en la API REST y las **Reglas de Seguridad de Firestore** para aislamiento de datos.
+
+### 7.1 Custom Claims (Firebase Auth)
+Al crear un usuario, el SuperAdmin o el Backend inyecta claims personalizados dentro del JWT. Estos claims contienen el rol y el identificador del tenant:
+```json
+{
+  "iss": "https://securetoken.google.com/saasrcb",
+  "aud": "saasrcb",
+  "sub": "user_uid_12345",
+  "role": "EMPRESA",
+  "tenantId": "tenant_antuane"
+}
+```
+El archivo [`auth.guard.ts`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/backend/src/auth/auth.guard.ts) del backend valida que las peticiones a sub-recursos (ej: Crear sucursal) contengan un token válido y que el `tenantId` del token coincida con el `tenantId` de la entidad que se quiere registrar.
+
+### 7.2 Reglas de Seguridad en Firestore (`firestore.rules`)
+Para evitar que un tenant lea datos de otro mediante peticiones SDK directas al cliente, se aplican reglas de seguridad basadas en claims:
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Regla de aislamiento para recursos por Tenant
+    match /branches/{branchId} {
+      allow read, write: if request.auth != null && 
+        request.auth.token.role == 'EMPRESA' && 
+        request.auth.token.tenantId == resource.data.tenantId;
+        
+      allow create: if request.auth != null && 
+        request.auth.token.role == 'EMPRESA' && 
+        request.auth.token.tenantId == request.resource.data.tenantId;
+    }
+    
+    match /tenants/{tenantId} {
+      allow read: if request.auth != null && 
+        (request.auth.token.role == 'SUPER_ADMIN' || request.auth.token.tenantId == tenantId);
+      allow write: if request.auth != null && request.auth.token.role == 'SUPER_ADMIN';
+    }
+  }
+}
 ```
 
 ---
 
-## 5. Modelo de Datos (Firestore NoSQL)
+## 8. Seguridad Avanzada: Autenticación de Doble Factor (2FA - TOTP)
+
+Los usuarios con el rol `SUPER_ADMIN` tienen la obligación de autenticarse mediante un esquema de **2FA (Two-Factor Authentication)** basado en el estándar RFC 6238 (**TOTP: Time-Based One-Time Password**).
+
+### 8.1 Flujo Matemático de TOTP
+1. **Generación del Secreto:** Se genera un secreto aleatorio de 160 bits codificado en Base32 (`secreto`).
+2. **Generación del QR:** Se construye una URI con formato estándar:
+   `otpauth://totp/GlamySaaS:admin@glamy.com?secret=SFY2UXL...&issuer=GlamySaaS`
+   El SuperAdmin escanea el código QR en aplicaciones como Google Authenticator o Authy.
+3. **Cálculo del Código:** El celular del usuario calcula el token basándose en el tiempo de época UNIX:
+   $$T = \lfloor \frac{TiempoUNIX - T_0}{30} \rfloor$$
+   $$HMAC = HMAC-SHA1(secreto, T)$$
+   Se extraen 6 dígitos decimales dinámicos del hash HMAC resultante.
+4. **Verificación en Servidor:** El servidor recibe el código de 6 dígitos ingresado por el usuario, recalcula el valor usando el secreto guardado en la base de datos y autoriza el inicio de sesión si coinciden dentro de una ventana de tolerancia de $\pm 30$ segundos (para tolerar desajustes de reloj en el cliente).
+
+---
+
+## 9. Modelo de Datos (NoSQL Firestore)
 
 El sistema almacena la información estructurada en colecciones raíz de Firestore. Las relaciones lógicas se garantizan mediante identificadores indexados (`tenantId`, `branchId`, `customerId`, `serviceId`, `staffId`).
 
-### 5.1 Diagrama Entidad-Relación Lógico (Mermaid)
+### 9.1 Diagrama Entidad-Relación Lógico (Mermaid)
 
 ```mermaid
 erDiagram
@@ -236,7 +341,7 @@ erDiagram
     STAFF ||--o{ APPOINTMENT : "atiende"
 ```
 
-### 5.2 Estructura Documental
+### 9.2 Estructura Documental
 
 #### Colección: `tenants`
 ```json
@@ -285,7 +390,7 @@ erDiagram
 
 ---
 
-## 6. Endpoints de la API REST
+## 10. Endpoints de la API REST
 
 Todas las peticiones del panel administrativo requieren la cabecera `Authorization: Bearer <JWT_TOKEN>`.
 
@@ -298,7 +403,7 @@ Todas las peticiones del panel administrativo requieren la cabecera `Authorizati
 - `GET /tenants` — Lista todas las empresas (Solo SuperAdmin).
 - `GET /tenants/:id` — Recupera la información de un tenant por ID.
 - `POST /tenants` — Registra un tenant, genera una cuenta en Firebase Auth con claim `role: 'EMPRESA'` y devuelve una clave temporal aleatoria.
-- `PATCH /tenants/:id` — Modifica datos del tenant. Si el estado cambia a `SUSPENDED`, deshabilita el acceso de forma restrictiva.
+- `PATCH /tenants/:id` — Modifica datos del tenant. Si el estado cambia a `SUSPENDED`, deshabilita el acceso de forma de bloqueo restrictivo.
 - `DELETE /tenants/:id` — Remueve el tenant y elimina en cascada todos sus documentos relacionados en Firestore.
 
 ### 📍 Sucursales y Recursos
@@ -311,11 +416,11 @@ Todas las peticiones del panel administrativo requieren la cabecera `Authorizati
 
 ---
 
-## 7. Componentes del Frontend
+## 11. Componentes del Frontend y Flujo de Autenticación
 
 La interfaz del frontend está estructurada bajo el patrón **Client Components** utilizando el enrutamiento de Next.js App Router.
 
-### 7.1 Diagrama de Secuencia de Autenticación y Redirección (Mermaid)
+### 11.1 Diagrama de Secuencia de Autenticación y Redirección (Mermaid)
 
 ```mermaid
 sequenceDiagram
@@ -337,7 +442,7 @@ sequenceDiagram
     end
 ```
 
-### 7.2 Mapeo de Vistas en el App Router
+### 11.2 Mapeo de Vistas en el App Router
 
 | Ruta del Archivo | URL de Acceso | Componente Principal | Funcionalidad |
 |------------------|---------------|----------------------|---------------|
@@ -350,86 +455,56 @@ sequenceDiagram
 
 ---
 
-## 8. Pruebas con SoapUI
+## 12. Guía de Pruebas REST con SoapUI
 
-Para validar el funcionamiento del AuthGuard y la serialización JSON de los controladores, se configuró un proyecto REST en **SoapUI**.
+Para validar el funcionamiento de los controladores NestJS y los JWT Claims, se pueden configurar las pruebas REST en **SoapUI**.
 
-### 8.1 Autenticación (Paso de Token JWT)
-Las cabeceras se ingresan en la pestaña **Headers** de la petición en SoapUI:
-```http
-Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-### 8.2 Creación de Tenant (`POST /tenants`)
-**Cuerpo de la Petición (JSON):**
-```json
-{
-  "name": "Barbería Classic",
-  "taxId": "20987654321",
-  "contactEmail": "contacto@classicbarber.pe",
-  "plan": "PRO"
-}
-```
-
-**Respuesta Exitosa (201 Created):**
-```json
-{
-  "id": "8yG9xKj2sL01",
-  "name": "Barbería Classic",
-  "taxId": "20987654321",
-  "contactEmail": "contacto@classicbarber.pe",
-  "status": "ACTIVE",
-  "plan": "PRO",
-  "credentials": {
-    "email": "contacto@classicbarber.pe",
-    "password": "k7m2p9x4q1A1!"
-  }
-}
-```
+### 12.1 Parámetros de Configuración del Proyecto
+Para automatizar los tokens dinámicos en SoapUI:
+1. Abra el panel **Project Properties** en SoapUI.
+2. Agregue una variable personalizada: `JWT_Token` e ingrese el token decodificado de Firebase.
+3. En la barra de configuración de Headers de cada petición REST, agregue la cabecera HTTP personalizada:
+   - Key: `Authorization`
+   - Value: `Bearer ${#Project#JWT_Token}`
+4. Agregue la petición `POST /tenants` con el JSON de prueba para crear la empresa.
 
 ---
 
-## 9. Despliegue en Firebase
+## 13. Despliegue en la Nube (Hosting y Serverless Functions)
 
-### 9.1 Arquitectura Serverless
+### 13.1 Arquitectura Serverless
 El ecosistema completo se aloja en los servidores globales de Google Cloud Platform (GCP) mediante la CLI de Firebase:
 - **Backend:** NestJS empaquetado como Firebase Cloud Functions v2 (HTTP Serverless).
 - **Frontend:** Next.js exportado estáticamente y servido en Firebase Hosting CDN.
 - **Base de Datos:** Cloud Firestore.
 
-### 9.2 Despliegue del Backend (Cloud Functions)
+### 13.2 Despliegue del Backend (Cloud Functions)
 ```bash
 cd backend
 npm run build
 firebase deploy --only functions
 ```
 
-### 9.3 Despliegue del Frontend (Hosting)
+### 13.3 Despliegue del Frontend (Hosting)
 ```bash
 cd frontend
 npm run build
 firebase deploy --only hosting
 ```
 
----
-
-## 10. Conclusiones
-
-1. **Aislamiento Multitenant Robusto:** La arquitectura diseñada aísla las transacciones comerciales por tenant utilizando consultas indexadas por `tenantId` en Firestore, garantizando seguridad y confidencialidad en los datos de los salones.
-2. **Ciclo de Vida en Cascada:** La implementación de disparadores por lotes (Batch updates) en NestJS asegura que las bajas o suspensiones de empresas impacten en cascada y de manera atómica a sucursales, citas y personal, previniendo la persistencia de huérfanos.
-3. **Control de Acceso Riguroso:** El uso de Custom Claims en JWT emitidos por Firebase Auth valida los perfiles directamente en el router, rechazando intentos de suplantación en milisegundos con códigos HTTP 401.
+URL del frontend en producción: **https://glamysaas.web.app**
 
 ---
 
-## 11. Práctica: Internacionalización (i18n) y Localización (l10n)
+## 14. Práctica: Internacionalización (i18n) y Localización (l10n)
 
-Se ha integrado un sistema completo de **Internacionalización (i18n)** y **Localización (l10n)** en el cliente para el frontend de **Glamy SaaS**. Esto permite adaptar dinámicamente toda la experiencia de usuario (incluyendo traducción de etiquetas, validación de formularios, visualización de alertas, formato de divisas regionales, fechas y números) a 4 lenguajes y regiones distintas:
+Se ha desarrollado un ecosistema completo de **Internacionalización (i18n)** y **Localización (l10n)** en el cliente para el frontend de **Glamy SaaS**. Esto permite adaptar dinámicamente toda la experiencia de usuario (incluyendo traducción de etiquetas, validación de formularios, visualización de alertas, formato de divisas regionales, fechas y números) a 4 lenguajes y regiones distintas:
 - 🇪🇸 **Español (`es`)** — Divisa: Soles Peruanos (`PEN`), formato: `S/. 150.00`
 - 🇺🇸 **Inglés (`en`)** — Divisa: Dólares Americanos (`USD`), formato: `$150.00`
 - 🇧🇷 **Portugués (`pt`)** — Divisa: Reales Brasileños (`BRL`), formato: `R$ 150,00`
 - 🇫🇷 **Francés (`fr`)** — Divisa: Euros (`EUR`), formato: `150,00 €`
 
-### 11.1 Arquitectura del Sistema de Localización
+### 14.1 Arquitectura del Sistema de Localización
 
 La traducción y localización se implementaron en el lado del cliente utilizando un patrón de diseño desacoplado. A continuación se presenta el diagrama de flujo arquitectónico de las dependencias y el estado global:
 
@@ -448,7 +523,7 @@ flowchart TD
     ClientState -->|Idioma + Formateadores| TestLab[Lab de Pruebas /test-i18n]
 ```
 
-### 11.2 Detalle de Archivos Creados y Lógica Implementada
+### 14.2 Detalle de Archivos Creados y Lógica Implementada
 
 #### A. Inicialización Core: [`i18n.ts`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/lib/i18n.ts)
 Este archivo gestiona las plantillas de traducción estructuradas en formato JSON. Posee claves anidadas para:
@@ -485,7 +560,7 @@ const formatCurrency = (value: number): string => {
 
 ---
 
-### 11.3 Guía de Calificación y Evidencia del Laboratorio (`/test-i18n`)
+### 14.3 Guía de Calificación y Evidencia del Laboratorio (`/test-i18n`)
 
 Para facilitar la revisión por parte del profesor, se diseñó la ruta interactiva `/test-i18n` ([`test-i18n/page.tsx`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/test-i18n/page.tsx)). Al acceder en modo local u online y alternar entre los 4 idiomas, se actualizan dinámicamente cuatro aspectos fundamentales:
 
@@ -503,7 +578,7 @@ Para facilitar la revisión por parte del profesor, se diseñó la ruta interact
 
 ---
 
-## 12. Rúbrica de Calificación (Práctica de i18n y l10n)
+## 15. Rúbrica de Calificación (Práctica de i18n y l10n)
 
 | Ítem | Descripción | Puntaje | Check |
 |------|-------------|---------|-------|
@@ -511,12 +586,31 @@ Para facilitar la revisión por parte del profesor, se diseñó la ruta interact
 | **i18n (Internacionalización)** | Configuración de `i18next` y `react-i18next` gestionando diccionarios completos en Español, Inglés, Portugués y Francés. | 4 | X |
 | **Prueba de l10n** | Validación desde el Frontend de formatos monetarios (`S/.`, `$`, `R$`, `€`) y fechas en la ruta `/test-i18n` y pantallas del sistema. | 4 | X |
 | **Prueba de i18n** | Pruebas dinámicas de cambio de idioma en navbar, formularios, modales, alertas y confirmaciones en los paneles administrativos y de cliente. | 4 | X |
-| **Informe** | Inclusión y desglose detallado de toda la práctica en este archivo `README.md` (Sección 11 y 12). | 4 | X |
+| **Informe** | Inclusión y desglose detallado de toda la práctica en este archivo `README.md` (Sección 14 y 15). | 4 | X |
 | **Total** | | **20** | |
 
 ---
 
-## 13. Enlaces de Interés
+## 16. Conclusiones
+
+1. **Aislamiento Multitenant Robusto:** La arquitectura diseñada aísla las transacciones comerciales por tenant utilizando consultas indexadas por `tenantId` en Firestore, garantizando seguridad y confidencialidad en los datos de los salones.
+2. **Ciclo de Vida en Cascada:** La implementación de disparadores por lotes (Batch updates) en NestJS asegura que las bajas o suspensiones de empresas impacten en cascada y de manera atómica a sucursales, citas y personal, previniendo la persistencia de huérfanos.
+3. **Control de Acceso Riguroso:** El uso de Custom Claims en JWT emitidos por Firebase Auth valida los perfiles directamente en el router, rechazando intentos de suplantación en milisegundos con códigos HTTP 401.
+
+---
+
+## 17. Roadmap de Desarrollo Futuro
+
+Planificación de mejoras para escalar el ecosistema Glamy SaaS:
+
+- [ ] **Pasarela de Pagos Localizada:** Integración de Stripe / Culqi en el wizard de reserva del cliente para cobros de adelanto o totales en local con pasarela segura.
+- [ ] **Módulo de Notificaciones:** Sistema automático de recordatorios por WhatsApp Business y Email (vía Twilio / SendGrid) 24 horas antes de cada reserva.
+- [ ] **Facturación Electrónica:** Generación automática de comprobantes de pago (Boletas/Facturas) integrados de forma transparente con la SUNAT (Perú) para planes PRO e Enterprise.
+- [ ] **Dashboard Estadístico para Tenants:** Incorporación de gráficos interactivos de ventas, servicios más pedidos y nivel de ocupación de estilistas por sucursal para dueños de salones.
+
+---
+
+## 18. Enlaces de Interés
 
 - **Frontend en Producción (Firebase):** https://glamysaas.web.app
 - **Laboratorio de Pruebas de i18n/l10n:** http://localhost:3000/test-i18n
