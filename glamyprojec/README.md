@@ -22,7 +22,11 @@
 </p>
 
 <p align="center">
-  <strong>Stack Tecnológico:</strong> Node.js (v22) | NestJS (v11) | Next.js (v16) | Firebase (Auth & Firestore)
+  <a href="#"><img src="https://img.shields.io/badge/Node.js-v22-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/NestJS-v11-E0234E?style=flat-square&logo=nestjs&logoColor=white" alt="NestJS"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/Next.js-v16-000000?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/Firebase-v12-FFCA28?style=flat-square&logo=firebase&logoColor=black" alt="Firebase"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/TailwindCSS-v4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" alt="TailwindCSS"/></a>
 </p>
 
 ---
@@ -108,6 +112,9 @@
 | **EMPRESA** | `bg-blue-500` | Panel Administrativo por Tenant | Controla sucursales, horarios, personal asignado, listado de clientes, catálogos de servicios y programación de citas específicas de su organización. |
 | **CLIENTE** | `bg-green-500` | Portal de Reservas | Registro de datos de contacto y asistente (wizard) interactivo de programación de reservas en 6 pasos. |
 
+> [!IMPORTANT]
+> El rol `SUPER_ADMIN` cuenta con privilegios globales y la capacidad de suspender o eliminar tenants en cascada. Por razones de seguridad crítica, el acceso a este panel requiere obligatoriamente la verificación de doble factor (2FA - Time-Based One-Time Password).
+
 ---
 
 ## 2. Descripción de Interfaces (UI Showcase)
@@ -129,12 +136,12 @@ En esta sección se detallan las vistas clave de la aplicación en producción.
 ## 3. Tecnologías Utilizadas y Explicación de Librerías
 
 ### 3.1 Stack General
-- **Backend Framework:** NestJS (v11) con adaptador Express.
-- **Frontend Framework:** Next.js (v16) con App Router y renderizado híbrido.
-- **Runtime:** Node.js (v22).
-- **Base de Datos NoSQL:** Google Cloud Firestore (Serverless).
-- **Autenticación:** Firebase Authentication con Custom Claims.
-- **Estilos:** TailwindCSS (v4) con PostCSS.
+*   🟢 **Runtime:** `Node.js (v22)` — Entorno de ejecución de Javascript robusto y de alto rendimiento.
+*   🔴 **Backend Framework:** `NestJS (v11)` — Arquitectura modular y estructurada con Express.
+*   ⚫ **Frontend Framework:** `Next.js (v16)` — Renderizado híbrido (SSR/Static) con App Router.
+*   🟠 **Base de Datos NoSQL:** `Google Cloud Firestore` — Base de datos serverless escalable basada en documentos.
+*   🟡 **Autenticación y Seguridad:** `Firebase Authentication` — Gestión de accesos con Custom Claims.
+*   🔵 **Diseño y Estilos:** `TailwindCSS (v4)` — Sistema de estilos moderno y optimizado.
 
 ### 3.2 Librerías del Backend (`backend/package.json`)
 
@@ -205,6 +212,9 @@ glamyprojec/
 ---
 
 ## 5. Instalación y Configuración del Backend (NestJS)
+
+> [!NOTE]
+> El backend está desarrollado modularmente y optimizado para funcionar tanto en un entorno local tradicional como empaquetado en una función serverless de Google Cloud.
 
 ### 5.1 Prerrequisitos
 - Node.js 22 o superior e instalador de paquetes `npm`.
@@ -297,6 +307,9 @@ NEXT_PUBLIC_API_URL="http://localhost:3000"
 
 ## 7. Arquitectura de Seguridad (Custom Claims y Reglas de Firestore)
 
+> [!CAUTION]
+> Cualquier brecha o mala configuración de las reglas de seguridad en Firestore permitiría a un tenant leer o modificar datos de otro mediante peticiones SDK directas. El mantenimiento estricto de las reglas declarativas en `firestore.rules` es vital para el aislamiento lógico de los datos.
+
 La seguridad y el aislamiento multi-tenant de Glamy SaaS se sostienen sobre dos pilares: los **Custom Claims en Firebase Authentication** para control de roles en la API REST y las **Reglas de Seguridad de Firestore** para aislamiento de datos.
 
 ### 7.1 Custom Claims (Firebase Auth)
@@ -355,6 +368,9 @@ La seguridad y confidencialidad se garantizan aplicando un doble filtro obligato
 ---
 
 ## 8. Seguridad Avanzada: Autenticación de Doble Factor (2FA - TOTP)
+
+> [!IMPORTANT]
+> El token de 2FA expira cada 30 segundos. Para que la verificación local funcione correctamente, la hora del dispositivo cliente (móvil) y del servidor deben estar perfectamente sincronizadas con el servidor de hora de red (NTP).
 
 Los usuarios con el rol `SUPER_ADMIN` tienen la obligación de autenticarse mediante un esquema de **2FA (Two-Factor Authentication)** basado en el estándar RFC 6238 (**TOTP: Time-Based One-Time Password**).
 
@@ -516,6 +532,9 @@ Para automatizar los tokens dinámicos en SoapUI:
    - Key: `Authorization`
    - Value: `Bearer ${#Project#JWT_Token}`
 4. Agregue la petición `POST /tenants` con el JSON de prueba para crear la empresa.
+
+> [!TIP]
+> Puedes extraer fácilmente tu JWT Token activo abriendo las herramientas de desarrollador del navegador (F12) en el dashboard de la app, y ejecutando `await auth.currentUser.getIdToken()` en la consola de Firebase. Copia ese valor directamente en la propiedad `JWT_Token` de SoapUI.
 
 ---
 
