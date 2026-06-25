@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react';
 import { auth } from '@/app/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
+import { useTranslation } from 'react-i18next';
+import { useLocale } from '@/app/lib/LocaleContext';
 import {
   Calendar,
   Clock,
   MapPin,
   User,
-  DollarSign,
-  Plus,
   LogOut,
   CheckCircle,
   Scissors,
@@ -19,12 +19,16 @@ import {
   Phone,
   ArrowLeft,
   Mail,
-  CalendarCheck
+  CalendarCheck,
+  Plus
 } from 'lucide-react';
 import { Tenant, Branch, Service, Staff, Appointment } from '@/app/types';
 
 export default function CustomerDashboard() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { locale, changeLocale, formatCurrency, formatDate, formatNumber } = useLocale();
+  
   const [user, setUser] = useState<any>(null);
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
@@ -234,7 +238,7 @@ export default function CustomerDashboard() {
   const handleDateTimeConfirm = (e: React.FormEvent) => {
     e.preventDefault();
     if (!bookingDate) {
-      setError("Por favor selecciona una fecha y hora válida.");
+      setError(t('customer.errorDateTime'));
       return;
     }
     setError("");
@@ -244,7 +248,7 @@ export default function CustomerDashboard() {
   // Submit reservation using nested JSON structure
   const submitBooking = async () => {
     if (!selectedTenant || !selectedBranch || !selectedService || !selectedStaff || !bookingDate) {
-      setError("Datos de reserva incompletos.");
+      setError(t('customer.errorIncomplete'));
       return;
     }
 
@@ -290,7 +294,7 @@ export default function CustomerDashboard() {
       });
 
       if (res.ok) {
-        setSuccessMessage("¡Reserva agendada con éxito!");
+        setSuccessMessage(t('customer.successBooking'));
         // Reset wizard state
         setStep(0);
         setSelectedTenant(null);
@@ -306,11 +310,11 @@ export default function CustomerDashboard() {
         setTimeout(() => setSuccessMessage(''), 3000);
       } else {
         const data = await res.json();
-        setError(data.message || "Error al procesar la reserva. Intenta de nuevo.");
+        setError(data.message || t('customer.errorBooking'));
       }
     } catch (err) {
       console.error("Error enviando reserva:", err);
-      setError("Error de conexión al servidor.");
+      setError(t('customer.errorServer'));
     } finally {
       setBookingLoading(false);
     }
@@ -318,21 +322,16 @@ export default function CustomerDashboard() {
 
   // Helper to format date beautifully
   const formatAppDate = (isoString: string) => {
-    const d = new Date(isoString);
-    return d.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    return formatDate(isoString);
   };
 
   const formatAppTime = (isoString: string) => {
     const d = new Date(isoString);
-    return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-  };
-
-  // Helper to get Tenant name from appointments list mapping or display it directly if available
-  const getAppTenantName = (app: Appointment) => {
-    // If we have a nested structure, maybe tenant info is also loaded, otherwise we use the tenant ID as fallback
-    // In our dashboard, we fetch tenants, so we can try to look it up in `tenants` state
-    const t = tenants.find(ten => ten.id === app.tenantId);
-    return t ? t.name : "Salón Glamy";
+    let timeLocale = 'es-PE';
+    if (locale === 'en') timeLocale = 'en-US';
+    else if (locale === 'pt') timeLocale = 'pt-BR';
+    else if (locale === 'fr') timeLocale = 'fr-FR';
+    return d.toLocaleTimeString(timeLocale, { hour: '2-digit', minute: '2-digit' });
   };
 
   return (
@@ -346,6 +345,23 @@ export default function CustomerDashboard() {
           </h1>
         </div>
         <div className="flex items-center gap-4">
+          {/* Selector de idioma */}
+          <div className="flex bg-slate-100 rounded-lg p-0.5 border border-slate-200 mr-2">
+            {(['es', 'en', 'pt', 'fr'] as const).map((lang) => (
+              <button
+                key={lang}
+                onClick={() => changeLocale(lang)}
+                className={`px-2.5 py-1 text-[10px] font-bold rounded-md transition-all uppercase ${
+                  locale === lang
+                    ? 'bg-rose-600 text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                {lang}
+              </button>
+            ))}
+          </div>
+
           <div className="hidden sm:flex flex-col text-right">
             <span className="text-sm font-bold text-slate-900">{userName}</span>
             <span className="text-xs text-slate-500">{userEmail}</span>
@@ -355,7 +371,7 @@ export default function CustomerDashboard() {
             className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 px-4 rounded-xl transition-all text-xs font-bold"
           >
             <LogOut className="w-4 h-4" />
-            <span className="hidden sm:inline">Cerrar Sesión</span>
+            <span className="hidden sm:inline">{t('nav.logout')}</span>
           </button>
         </div>
       </nav>
@@ -381,7 +397,7 @@ export default function CustomerDashboard() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="w-12 h-12 border-4 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-slate-500 text-sm font-medium mt-4">Cargando tu información...</p>
+            <p className="text-slate-500 text-sm font-medium mt-4">{t('customer.loadingInfo')}</p>
           </div>
         ) : (
           <>
@@ -393,15 +409,15 @@ export default function CustomerDashboard() {
                 <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-rose-950 p-8 rounded-3xl text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
                   <div className="absolute right-0 top-0 w-64 h-64 bg-rose-500/10 rounded-full blur-3xl"></div>
                   <div className="space-y-2 z-10">
-                    <h2 className="text-3xl font-black">¡Hola, {userName}!</h2>
-                    <p className="text-slate-300 text-sm">Reserva citas en los mejores salones de belleza y barberías al instante.</p>
+                    <h2 className="text-3xl font-black">{t('customer.welcome', { name: userName })}</h2>
+                    <p className="text-slate-300 text-sm">{t('customer.subWelcome')}</p>
                   </div>
                   <button
                     onClick={startBooking}
                     className="flex items-center justify-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 px-6 rounded-2xl transition-all hover:scale-[1.02] shadow-lg shadow-rose-500/20 text-sm z-10"
                   >
                     <Plus className="w-5 h-5" />
-                    Reservar Nueva Cita
+                    {t('customer.newAppointment')}
                   </button>
                 </div>
 
@@ -413,10 +429,10 @@ export default function CustomerDashboard() {
                     <div className="flex justify-between items-center">
                       <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
                         <CalendarCheck className="w-5 h-5 text-rose-500" />
-                        Tus Próximas Citas
+                        {t('customer.myAppointments')}
                       </h3>
                       <span className="text-xs bg-slate-200 text-slate-600 px-3 py-1 rounded-full font-bold">
-                        {appointments.length} en total
+                        {t('customer.totalAppointments', { count: appointments.length })}
                       </span>
                     </div>
 
@@ -425,13 +441,13 @@ export default function CustomerDashboard() {
                         <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto text-2xl">
                           📅
                         </div>
-                        <h4 className="text-base font-bold text-slate-800">No tienes citas agendadas</h4>
-                        <p className="text-slate-500 text-xs max-w-xs mx-auto">Encuentra un salón cercano, selecciona el servicio que desees y agenda tu cita en segundos.</p>
+                        <h4 className="text-base font-bold text-slate-800">{t('customer.noAppointments')}</h4>
+                        <p className="text-slate-500 text-xs max-w-xs mx-auto">{t('customer.noAppointmentsDesc')}</p>
                         <button
                           onClick={startBooking}
                           className="text-rose-500 font-bold text-xs hover:underline"
                         >
-                          Reservar tu primera cita ahora →
+                          {t('customer.bookFirst')}
                         </button>
                       </div>
                     ) : (
@@ -468,7 +484,7 @@ export default function CustomerDashboard() {
                                 </span>
                                 <span className="flex items-center gap-1 font-medium text-slate-500">
                                   <User className="w-3.5 h-3.5 text-slate-400" />
-                                  Atendido por: {app.staff?.name || "Cualquier profesional"}
+                                  {t('customer.stylist', { name: app.staff?.name || "profesional" })}
                                 </span>
                               </div>
                             </div>
@@ -476,15 +492,14 @@ export default function CustomerDashboard() {
                             {/* Price and status */}
                             <div className="flex sm:flex-col items-end justify-between w-full sm:w-auto border-t sm:border-t-0 pt-4 sm:pt-0 border-slate-100">
                               <span className="text-lg font-black text-slate-900 flex items-center">
-                                <span className="text-sm font-normal text-slate-400 mr-0.5">S/.</span>
-                                {app.service?.price || '0.00'}
+                                {formatCurrency(app.service?.price || 0)}
                               </span>
                               <span className={`mt-2 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border ${
                                 app.status === 'CONFIRMED' ? 'bg-green-500/10 text-green-600 border-green-500/20' :
                                 app.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20' :
                                 'bg-rose-500/10 text-rose-600 border-rose-500/20'
                               }`}>
-                                {app.status === 'PENDING' ? 'Pendiente' : app.status === 'CONFIRMED' ? 'Confirmada' : 'Cancelada'}
+                                {app.status === 'PENDING' ? t('table.statusActive') : app.status === 'CONFIRMED' ? t('table.statusActive') : t('table.statusSuspended')}
                               </span>
                             </div>
 
@@ -496,7 +511,7 @@ export default function CustomerDashboard() {
 
                   {/* Right side: quick stats & info */}
                   <div className="space-y-6">
-                    <h3 className="text-lg font-black text-slate-900">Tu Perfil</h3>
+                    <h3 className="text-lg font-black text-slate-900">{t('customer.profileTitle')}</h3>
                     <div className="bg-white border border-slate-200 p-6 rounded-3xl space-y-4 shadow-sm">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center font-bold text-lg">
@@ -504,7 +519,7 @@ export default function CustomerDashboard() {
                         </div>
                         <div>
                           <h4 className="font-bold text-slate-900">{userName}</h4>
-                          <span className="text-xs text-slate-500">Cliente Glamy</span>
+                          <span className="text-xs text-slate-500">{t('customer.profileSub')}</span>
                         </div>
                       </div>
 
@@ -515,7 +530,7 @@ export default function CustomerDashboard() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Phone className="w-4 h-4 text-slate-400" />
-                          <span>{customerPhone || "Teléfono no registrado"}</span>
+                          <span>{customerPhone || t('customer.phoneNotRegistered')}</span>
                         </div>
                       </div>
                     </div>
@@ -523,10 +538,10 @@ export default function CustomerDashboard() {
                     <div className="bg-rose-50 border border-rose-100 p-6 rounded-3xl space-y-2">
                       <h4 className="text-sm font-bold text-rose-950 flex items-center gap-1.5">
                         <Scissors className="w-4 h-4 text-rose-500" />
-                        ¿Cómo funciona Glamy?
+                        {t('customer.howItWorksTitle')}
                       </h4>
                       <p className="text-xs text-rose-900/80 leading-relaxed">
-                        Seleccionas el salón de tu preferencia, eliges la sucursal, el servicio y el estilista de tu agrado. Confirmamos tu cita al instante con almacenamiento inteligente para un servicio más rápido.
+                        {t('customer.howItWorksDesc')}
                       </p>
                     </div>
                   </div>
@@ -547,8 +562,8 @@ export default function CustomerDashboard() {
                     <ArrowLeft className="w-4 h-4 text-slate-700" />
                   </button>
                   <div>
-                    <span className="text-xs text-rose-500 font-bold uppercase tracking-wider">Paso 1 de 6</span>
-                    <h2 className="text-2xl font-black text-slate-900 mt-0.5">Selecciona un Salón de Belleza</h2>
+                    <span className="text-xs text-rose-500 font-bold uppercase tracking-wider">{t('customer.step', { current: 1, total: 6 })}</span>
+                    <h2 className="text-2xl font-black text-slate-900 mt-0.5">{t('customer.selectSalon')}</h2>
                   </div>
                 </div>
 
@@ -558,7 +573,7 @@ export default function CustomerDashboard() {
                   </div>
                 ) : tenants.length === 0 ? (
                   <div className="bg-white border border-slate-200 p-8 rounded-2xl text-center text-slate-500">
-                    No hay salones disponibles en este momento.
+                    {t('customer.noSalons')}
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -602,8 +617,8 @@ export default function CustomerDashboard() {
                     <ArrowLeft className="w-4 h-4 text-slate-700" />
                   </button>
                   <div>
-                    <span className="text-xs text-rose-500 font-bold uppercase tracking-wider">Paso 2 de 6 • {selectedTenant?.name}</span>
-                    <h2 className="text-2xl font-black text-slate-900 mt-0.5">Selecciona una Sucursal (Sede)</h2>
+                    <span className="text-xs text-rose-500 font-bold uppercase tracking-wider">{t('customer.step', { current: 2, total: 6 })} • {selectedTenant?.name}</span>
+                    <h2 className="text-2xl font-black text-slate-900 mt-0.5">{t('customer.selectBranch')}</h2>
                   </div>
                 </div>
 
@@ -613,8 +628,8 @@ export default function CustomerDashboard() {
                   </div>
                 ) : branches.length === 0 ? (
                   <div className="bg-white border border-slate-200 p-8 rounded-2xl text-center text-slate-500 space-y-4">
-                    <p>Este salón no tiene sucursales disponibles.</p>
-                    <button onClick={() => setStep(1)} className="bg-slate-900 text-white py-2 px-4 rounded-xl text-sm font-bold">Volver</button>
+                    <p>{t('customer.noBranches')}</p>
+                    <button onClick={() => setStep(1)} className="bg-slate-900 text-white py-2 px-4 rounded-xl text-sm font-bold">{t('modals.cancel')}</button>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -660,8 +675,8 @@ export default function CustomerDashboard() {
                     <ArrowLeft className="w-4 h-4 text-slate-700" />
                   </button>
                   <div>
-                    <span className="text-xs text-rose-500 font-bold uppercase tracking-wider">Paso 3 de 6 • {selectedTenant?.name}</span>
-                    <h2 className="text-2xl font-black text-slate-900 mt-0.5">Selecciona un Servicio</h2>
+                    <span className="text-xs text-rose-500 font-bold uppercase tracking-wider">{t('customer.step', { current: 3, total: 6 })} • {selectedTenant?.name}</span>
+                    <h2 className="text-2xl font-black text-slate-900 mt-0.5">{t('customer.selectService')}</h2>
                   </div>
                 </div>
 
@@ -671,8 +686,8 @@ export default function CustomerDashboard() {
                   </div>
                 ) : services.length === 0 ? (
                   <div className="bg-white border border-slate-200 p-8 rounded-2xl text-center text-slate-500 space-y-4">
-                    <p>Este salón no tiene servicios registrados.</p>
-                    <button onClick={() => setStep(2)} className="bg-slate-900 text-white py-2 px-4 rounded-xl text-sm font-bold">Volver</button>
+                    <p>{t('customer.noServices')}</p>
+                    <button onClick={() => setStep(2)} className="bg-slate-900 text-white py-2 px-4 rounded-xl text-sm font-bold">{t('modals.cancel')}</button>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -688,8 +703,7 @@ export default function CustomerDashboard() {
                               {service.name}
                             </h3>
                             <span className="text-rose-600 font-black text-lg flex items-center bg-rose-50 px-2.5 py-1 rounded-xl">
-                              <span className="text-xs font-normal text-rose-400 mr-0.5">S/.</span>
-                              {service.price}
+                              {formatCurrency(service.price)}
                             </span>
                           </div>
                           <p className="text-xs text-slate-500 leading-normal line-clamp-2">
@@ -697,7 +711,7 @@ export default function CustomerDashboard() {
                           </p>
                           <div className="pt-2 flex items-center gap-1.5 text-xs text-slate-400 font-semibold">
                             <Clock className="w-3.5 h-3.5 text-slate-300" />
-                            {service.durationInMinutes} minutos
+                            {service.durationInMinutes} {t('nav.services')}
                           </div>
                         </div>
                       </button>
@@ -718,8 +732,8 @@ export default function CustomerDashboard() {
                     <ArrowLeft className="w-4 h-4 text-slate-700" />
                   </button>
                   <div>
-                    <span className="text-xs text-rose-500 font-bold uppercase tracking-wider">Paso 4 de 6 • {selectedTenant?.name}</span>
-                    <h2 className="text-2xl font-black text-slate-900 mt-0.5">Selecciona un Profesional</h2>
+                    <span className="text-xs text-rose-500 font-bold uppercase tracking-wider">{t('customer.step', { current: 4, total: 6 })} • {selectedTenant?.name}</span>
+                    <h2 className="text-2xl font-black text-slate-900 mt-0.5">{t('customer.selectStaff')}</h2>
                   </div>
                 </div>
 
@@ -729,12 +743,12 @@ export default function CustomerDashboard() {
                   </div>
                 ) : staff.length === 0 ? (
                   <div className="bg-white border border-slate-200 p-8 rounded-2xl text-center text-slate-500 space-y-4">
-                    <p>No hay personal registrado en este salón. Crearemos un estilista por defecto para que puedas agendar.</p>
+                    <p>{t('customer.noStaff')}</p>
                     <button
                       onClick={() => selectStaff({ id: 'default', name: 'Estilista Glamy', role: 'Estilista Principal', phone: '', tenantId: selectedTenant?.id || '' })}
                       className="bg-rose-500 text-white py-3 px-6 rounded-xl text-sm font-bold hover:bg-rose-600 transition-colors"
                     >
-                      Continuar con Especialista Glamy
+                      {t('customer.continueDefaultStaff')}
                     </button>
                   </div>
                 ) : (
@@ -777,8 +791,8 @@ export default function CustomerDashboard() {
                     <ArrowLeft className="w-4 h-4 text-slate-700" />
                   </button>
                   <div>
-                    <span className="text-xs text-rose-500 font-bold uppercase tracking-wider">Paso 5 de 6 • {selectedTenant?.name}</span>
-                    <h2 className="text-2xl font-black text-slate-900 mt-0.5">Selecciona Fecha y Hora</h2>
+                    <span className="text-xs text-rose-500 font-bold uppercase tracking-wider">{t('customer.step', { current: 5, total: 6 })} • {selectedTenant?.name}</span>
+                    <h2 className="text-2xl font-black text-slate-900 mt-0.5">{t('customer.selectDateTime')}</h2>
                   </div>
                 </div>
 
@@ -787,7 +801,7 @@ export default function CustomerDashboard() {
                     <div>
                       <label className="text-xs text-slate-500 uppercase font-bold mb-2 block flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
-                        Fecha y Hora de la Cita
+                        {t('customer.bookingDateTimeLabel')}
                       </label>
                       <input
                         type="datetime-local"
@@ -797,13 +811,13 @@ export default function CustomerDashboard() {
                         required
                         min={new Date().toISOString().slice(0, 16)}
                       />
-                      <p className="text-xs text-slate-400 mt-2">Introduce la fecha y hora de tu preferencia para la cita en el salón.</p>
+                      <p className="text-xs text-slate-400 mt-2">{t('customer.bookingDateTimeHelp')}</p>
                     </div>
 
                     <div>
                       <label className="text-xs text-slate-500 uppercase font-bold mb-2 block flex items-center gap-1">
                         <Phone className="w-4 h-4" />
-                        Tu Teléfono de Contacto (Opcional)
+                        {t('customer.phoneLabel')}
                       </label>
                       <input
                         type="tel"
@@ -819,14 +833,14 @@ export default function CustomerDashboard() {
                       type="submit"
                       className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl transition-colors text-sm"
                     >
-                      Continuar al Resumen
+                      {t('customer.continueToSummary')}
                     </button>
                   </form>
                 </div>
               </div>
             )}
 
-            {/* STEP 6: CONFIRM RESERVATION (RESUMEN JSON ANIDADO) */}
+            {/* STEP 6: CONFIRM RESERVATION */}
             {step === 6 && (
               <div className="space-y-6">
                 <div className="flex items-center gap-3">
@@ -837,8 +851,8 @@ export default function CustomerDashboard() {
                     <ArrowLeft className="w-4 h-4 text-slate-700" />
                   </button>
                   <div>
-                    <span className="text-xs text-rose-500 font-bold uppercase tracking-wider">Paso 6 de 6</span>
-                    <h2 className="text-2xl font-black text-slate-900 mt-0.5">Confirma tu Reserva</h2>
+                    <span className="text-xs text-rose-500 font-bold uppercase tracking-wider">{t('customer.step', { current: 6, total: 6 })}</span>
+                    <h2 className="text-2xl font-black text-slate-900 mt-0.5">{t('customer.confirmBooking')}</h2>
                   </div>
                 </div>
 
@@ -847,17 +861,17 @@ export default function CustomerDashboard() {
                   {/* Summary breakdown */}
                   <div className="bg-white border border-slate-200 p-6 rounded-3xl space-y-6 shadow-sm">
                     <h3 className="text-lg font-black text-slate-900 pb-3 border-b border-slate-100">
-                      Resumen de la Cita
+                      {t('customer.summaryTitle')}
                     </h3>
 
                     {/* Salon, Sede */}
                     <div className="space-y-3">
                       <div>
-                        <span className="text-[10px] text-slate-400 font-bold uppercase block">Salón de Belleza</span>
+                        <span className="text-[10px] text-slate-400 font-bold uppercase block">{t('customer.selectedSalon')}</span>
                         <span className="font-bold text-slate-900 text-base">{selectedTenant?.name}</span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-slate-400 font-bold uppercase block">Sede / Sucursal</span>
+                        <span className="text-[10px] text-slate-400 font-bold uppercase block">{t('customer.selectedBranch')}</span>
                         <div className="flex items-start gap-1.5 mt-0.5">
                           <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
                           <div>
@@ -871,12 +885,12 @@ export default function CustomerDashboard() {
                     {/* Service & Staff */}
                     <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
                       <div>
-                        <span className="text-[10px] text-slate-400 font-bold uppercase block">Servicio Seleccionado</span>
+                        <span className="text-[10px] text-slate-400 font-bold uppercase block">{t('customer.selectedService')}</span>
                         <span className="font-bold text-slate-950 text-sm block mt-0.5">{selectedService?.name}</span>
                         <span className="text-xs text-slate-500 block mt-0.5">{selectedService?.durationInMinutes} mins</span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-slate-400 font-bold uppercase block">Profesional a Cargo</span>
+                        <span className="text-[10px] text-slate-400 font-bold uppercase block">{t('customer.selectedStaff')}</span>
                         <span className="font-bold text-slate-950 text-sm block mt-0.5">{selectedStaff?.name}</span>
                         <span className="text-xs text-rose-500 font-bold block mt-0.5">{selectedStaff?.role}</span>
                       </div>
@@ -885,7 +899,7 @@ export default function CustomerDashboard() {
                     {/* Date and Time */}
                     <div className="bg-slate-50 p-4 rounded-2xl flex justify-between items-center">
                       <div className="space-y-1">
-                        <span className="text-[10px] text-slate-400 font-bold uppercase block">Programación</span>
+                        <span className="text-[10px] text-slate-400 font-bold uppercase block">{t('customer.scheduling')}</span>
                         <span className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
                           <Calendar className="w-4 h-4 text-rose-500" />
                           {formatAppDate(bookingDate)}
@@ -899,10 +913,9 @@ export default function CustomerDashboard() {
 
                     {/* Total Price */}
                     <div className="pt-4 border-t border-slate-100 flex justify-between items-center">
-                      <span className="font-bold text-slate-800">Total a pagar en local:</span>
+                      <span className="font-bold text-slate-800">{t('customer.totalPayable')}</span>
                       <span className="text-2xl font-black text-slate-900 flex items-center">
-                        <span className="text-sm font-normal text-slate-400 mr-0.5">S/.</span>
-                        {selectedService?.price.toFixed(2)}
+                        {formatCurrency(selectedService?.price || 0)}
                       </span>
                     </div>
 
@@ -915,14 +928,14 @@ export default function CustomerDashboard() {
                         {bookingLoading ? (
                           <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         ) : (
-                          <>Agendar y Registrar Reserva</>
+                          <>{t('customer.submitBooking')}</>
                         )}
                       </button>
                       <button
                         onClick={() => setStep(5)}
                         className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-2xl transition-colors text-xs"
                       >
-                        Modificar Fecha u Hora
+                        {t('customer.modifyDateTime')}
                       </button>
                     </div>
                   </div>

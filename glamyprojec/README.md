@@ -880,22 +880,66 @@ Para el frontend en producción, las variables de entorno de Firebase se incluye
 
 ---
 
-## 11. Rúbrica de Autoevaluación
+## 11. Práctica: Internacionalización (i18n) y Localización (l10n)
 
-| Ítem | Descripción | Pts | Check | Est. |
-|------|-------------|-----|-------|------|
-| 1. GitHub | Repositorio con todos los archivos necesarios. Se clona. | 2 | X | 2.0 |
-| 2. Firebase/Firestore | Configura base de datos en la nube (equivalente a Supabase). | 4 | X | 4.0 |
-| 3. REST Framework | Endpoints serializados (NestJS Controllers + DTOs) que envían y reciben JSON. | 4 | X | 4.0 |
-| 4. JWT | Firebase Auth con Custom Claims para autenticar y autorizar operaciones. | 4 | X | 4.0 |
-| 5. SoapUI | Consume REST desde cliente SoapUI. | 3 | X | 3.0 |
-| 6. Deploy | Aplicación desplegada en Firebase (Cloud Functions + Hosting). | 3 | X | 3.0 |
-| **Total** | | **20** | | **20.0** |
+Se ha integrado un sistema completo de internacionalización (i18n) y localización (l10n) en el frontend de **Glamy SaaS** para permitir que la plataforma sea accesible de forma multiidioma y multirregión. El sistema soporta **4 idiomas**: Español (`es`), Inglés (`en`), Portugués (`pt`) y Francés (`fr`).
+
+### 11.1 Librerías Utilizadas
+
+1. **`i18next` & `react-i18next` (i18n)**: Usadas para el motor de traducción de textos en la interfaz de usuario. Almacena diccionarios con claves estructuradas para navegación, formularios, tablas, modales y mensajes.
+2. **`date-fns` (l10n)**: Librería utilizada para dar formato localizado a las fechas en función del idioma seleccionado (`es`, `en-US`, `pt`, `fr`).
+3. **`Intl` API (l10n)**: API nativa de JavaScript utilizada para formatear números y divisas de acuerdo a la región:
+   - **Español (`es`)**: Moneda en Soles Peruanos (`PEN`), formato: `S/. 150.00`
+   - **Inglés (`en`)**: Moneda en Dólares Estadounidenses (`USD`), formato: `$150.00`
+   - **Portugués (`pt`)**: Moneda en Reales Brasileños (`BRL`), formato: `R$ 150,00`
+   - **Francés (`fr`)**: Moneda en Euros (`EUR`), formato: `150,00 €`
+
+### 11.2 Estructura de Archivos Creados y Modificados
+
+- **[`i18n.ts`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/lib/i18n.ts) [NEW]**: Archivo de configuración central de `i18next` que inicializa el soporte de React y define todos los diccionarios de traducción en los 4 idiomas.
+- **[`LocaleContext.tsx`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/lib/LocaleContext.tsx) [NEW]**: Proveedor de contexto React que maneja el idioma activo, persiste la preferencia en `localStorage`, inicializa i18n en el cliente y expone los métodos formateadores `formatCurrency()`, `formatDate()` y `formatNumber()`.
+- **[`layout.tsx`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/layout.tsx) [MODIFY]**: Se envolvió la raíz de la aplicación con `LocaleProvider` para dotar de traducción y localización a todo el ecosistema de vistas.
+- **[`page.tsx`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/page.tsx) (SuperAdmin) [MODIFY]**: Se tradujeron los elementos de la interfaz (KPIs, formularios, directorio, modales, alertas y confirmaciones) y se añadió el componente selector de idioma en la barra de navegación. Los precios de los planes SaaS se localizan dinámicamente según la divisa seleccionada.
+- **[`page.tsx`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/tenant/[id]/page.tsx) (Tenant Admin) [MODIFY]**: Se tradujo la barra de navegación del Tenant (Clientes, Personal, Servicios, Citas, Salir) y el formulario de creación de sedes, integrando el selector de idiomas en el header principal.
+- **[`page.tsx`](file:///d:/universidad/ingeniera%20WEB%20CUrso/Glamy/glamyprojec/frontend/app/test-i18n/page.tsx) [NEW]**: Página de laboratorio accesible en la ruta `/test-i18n` para realizar pruebas dinámicas y calificar el funcionamiento de las traducciones y formatos regionales.
+
+### 11.3 Flujo de Funcionamiento (Cliente)
+
+Como la aplicación Next.js usa exportación estática (`output: 'export'`), toda la negociación de idiomas se efectúa del lado del cliente:
+1. Al cargar la página, se lee la preferencia guardada en `localStorage` (bajo la clave `glamy_lang`). Si no existe, se define Español (`es`) por defecto.
+2. El selector de la navbar permite cambiar el estado del contexto.
+3. El contexto actualiza `i18n` para cambiar todos los textos estáticos dinámicamente y propaga los formateadores locales para actualizar fechas, números y monedas al instante.
+
+### 11.4 Ejecución de Pruebas de i18n y l10n
+
+Para realizar las pruebas y evidenciar el laboratorio:
+1. Inicie la aplicación en modo desarrollo con `npm run dev` en el directorio `frontend/`.
+2. Navegue a la ruta de pruebas: **http://localhost:3000/test-i18n**.
+3. Haga clic en los botones de selección de idioma (**Español**, **English**, **Português**, **Français**) y verifique que:
+   - El texto del card "Traducción" cambie de idioma.
+   - El formato de la fecha de hoy se adapte a cada convención (ej. `25 de junio de 2026` vs `June 25, 2026`).
+   - La divisa cambie de símbolo y formato de separación (ej. `S/. 1,500.50` vs `1 500,50 €`).
+   - El separador de millares y decimales de los números cambie correspondientemente.
+
+---
+
+## 12. Rúbrica de Calificación (Práctica de i18n y l10n)
+
+| Ítem | Descripción | Puntaje | Check |
+|------|-------------|---------|-------|
+| **l10n** | Instalación, configuración de librería `date-fns` y API `Intl` para localización de fechas, monedas y números. | 4 | X |
+| **i18n** | Instalación, configuración de librería `i18next` y `react-i18next` con 4 idiomas (ES, EN, PT, FR) para internacionalización. | 4 | X |
+| **Prueba de l10n** | Prueba de localización y formateo de fechas y monedas desde el FrontEnd en `/test-i18n`. | 4 | X |
+| **Prueba de i18n** | Prueba de traducción dinámica de UI y alertas en el FrontEnd en los paneles SuperAdmin y Tenant. | 4 | X |
+| **Informe** | Detalle técnico completo de la práctica de i18n y l10n redactado en el `README.md` (Sección 11). | 4 | X |
+| **Total** | | **20** | |
 
 ---
 
 ## Enlaces
 
 - **Frontend (producción):** https://glamysaas.web.app
+- **Página de Pruebas i18n/l10n:** http://localhost:3000/test-i18n
 - **Repositorio GitHub:** https://github.com/Gustavo99400/SaaSBll.git
 - **Proyecto Firebase:** saasrcb
+
