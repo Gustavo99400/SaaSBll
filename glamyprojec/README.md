@@ -18,15 +18,22 @@
 
 <p align="center">
   <strong>INTEGRANTES:</strong><br/>
-  - Mares Graos Frederick Dicarlo<br/>
-  - Flores Vera Gustavo Alexander<br/>
-  - Saya Ramos Arnold Daniel<br/>
-  - Ortiz Rosas Joshua David
+  • Mares Graos Frederick Dicarlo<br/>
+  • Flores Vera Gustavo Alexander<br/>
+  • Saya Ramos Arnold Daniel<br/>
+  • Ortiz Rosas Joshua David
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Node.js-v22-green?style=for-the-badge&logo=node.js" alt="Node version"/>
+  <img src="https://img.shields.io/badge/NestJS-v11-red?style=for-the-badge&logo=nestjs" alt="NestJS version"/>
+  <img src="https://img.shields.io/badge/Next.js-v16-black?style=for-the-badge&logo=next.js" alt="NextJS version"/>
+  <img src="https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore-orange?style=for-the-badge&logo=firebase" alt="Firebase version"/>
 </p>
 
 ---
 
-## Tabla de Contenidos
+## 📋 Tabla de Contenidos
 
 1. [Descripción del Proyecto](#1-descripción-del-proyecto)
 2. [Tecnologías Utilizadas y Explicación de Librerías](#2-tecnologías-utilizadas-y-explicación-de-librerías)
@@ -40,136 +47,96 @@
 10. [Conclusiones](#10-conclusiones)
 11. [Práctica: Internacionalización (i18n) y Localización (l10n)](#11-práctica-internacionalización-i18n-y-localización-l10n)
 12. [Rúbrica de Calificación (Práctica de i18n y l10n)](#12-rúbrica-de-calificación-práctica-de-i18n-y-l10n)
+13. [Enlaces de Interés](#13-enlaces-de-interés)
 
 ---
 
 ## 1. Descripción del Proyecto
 
-**Glamy SaaS** es un sistema web diseñado para automatizar la gestión integral de salones de belleza bajo un modelo *Software as a Service* (SaaS) multi-tenant. El sistema permite:
+**Glamy SaaS** es un ecosistema digital multi-tenant diseñado para automatizar y administrar de manera centralizada salones de belleza, barberías y centros de estética. Bajo un modelo de Software as a Service (SaaS), la plataforma permite aislar los datos de cada salón de belleza (tenant) a la vez que provee herramientas globales de administración.
 
-- Registrar y administrar múltiples empresas (tenants) con planes de suscripción (STARTUP, PRO, ENTERPRISE).
-- Gestionar sucursales, personal, servicios y clientes por cada empresa.
-- Programar y controlar citas/reservas de clientes con profesionales específicos.
-- Autenticación diferenciada por roles: SuperAdmin (con 2FA), Empresa y Cliente.
-- Operaciones en cascada al suspender o eliminar una empresa.
-- Panel analítico con KPIs y gráficos de distribución por suscripción.
-- Exportación de reportes en formato CSV.
+### Características Clave
+- **Aislamiento Multi-Tenant:** Cada salón de belleza administra sus propios recursos (sucursales, personal, catálogos de servicios, clientes y reservas).
+- **Esquema de Suscripciones:** Soporte nativo para planes `STARTUP`, `PRO` y `ENTERPRISE`.
+- **Autenticación Basada en Roles con Requisitos de Seguridad:** SuperAdmin (con 2FA obligatorio por TOTP), Empresa (acceso al panel de control específico del tenant) y Cliente (wizard interactivo de reservas).
+- **Operaciones en Cascada:** Al suspender o eliminar un tenant, el sistema propaga la acción a todos los recursos dependientes utilizando transacciones por lotes en la base de datos Firestore.
 
-### Roles del Sistema
+### 👥 Roles del Sistema
 
-| Rol | Acceso | Descripción |
-|-----|--------|-------------|
-| SUPER_ADMIN | Panel global | Administra todas las empresas, KPIs, gráficos, 2FA obligatorio |
-| EMPRESA | Panel por tenant | Gestiona sucursales, personal, servicios, clientes y citas de su empresa |
-| Cliente | Portal de reservas | Agenda citas, selecciona sucursal, servicio y profesional |
+| Rol | Distintivo | Acceso | Descripción |
+|-----|------------|--------|-------------|
+| **SUPER_ADMIN** | `bg-red-500` | Panel Global Maestro | Administra todas las empresas, monitorea KPIs, gráficos distributivos de planes, y genera nuevas cuentas empresariales con credenciales temporales. Requiere 2FA. |
+| **EMPRESA** | `bg-blue-500` | Panel Administrativo por Tenant | Controla sucursales, horarios, personal asignado, listado de clientes, catálogos de servicios y programación de citas específicas de su organización. |
+| **CLIENTE** | `bg-green-500` | Portal de Reservas | Registro de datos de contacto y asistente (wizard) interactivo de programación de reservas en 6 pasos. |
 
 ---
 
 ## 2. Tecnologías Utilizadas y Explicación de Librerías
 
 ### 2.1 Stack General
-
-| Tecnología | Versión | Propósito |
-|------------|---------|-----------|
-| Node.js | 22 | Entorno de ejecución JavaScript/TypeScript |
-| TypeScript | 5.x | Lenguaje tipado para backend y frontend |
-| NestJS | 11 | Framework backend para API REST |
-| Next.js | 16 | Framework frontend con React y App Router |
-| React | 19 | Librería UI del frontend |
-| TailwindCSS | 4 | Framework de estilos utilitario |
-| Firebase Auth | — | Autenticación JWT con Custom Claims |
-| Firebase Firestore | — | Base de datos NoSQL en la nube |
-| Firebase Cloud Functions | v2 | Despliegue serverless del backend |
-| Firebase Hosting | — | Hosting del frontend estático |
-| Git / GitHub | — | Control de versiones |
+- **Backend Framework:** NestJS (v11) con adaptador Express.
+- **Frontend Framework:** Next.js (v16) con App Router y renderizado híbrido.
+- **Runtime:** Node.js (v22).
+- **Base de Datos NoSQL:** Google Cloud Firestore (Serverless).
+- **Autenticación:** Firebase Authentication con Custom Claims.
+- **Estilos:** TailwindCSS (v4) con PostCSS.
 
 ### 2.2 Librerías del Backend (`backend/package.json`)
 
 | Librería | Versión | Explicación |
 |----------|---------|-------------|
-| `@nestjs/common` | ^11.0.1 | Módulo principal de NestJS que provee decoradores (Controller, Get, Post, Injectable), guards, pipes y utilidades core para construir la API. |
-| `@nestjs/core` | ^11.0.1 | Núcleo del framework NestJS: maneja el ciclo de vida, la inyección de dependencias y el arranque de la aplicación. |
-| `@nestjs/platform-express` | ^11.0.1 | Adaptador HTTP que integra NestJS con Express, permitiendo usar middleware de Express como CORS. |
-| `@nestjs/mapped-types` | * | Utilidad para transformar DTOs (ej. PartialType para crear update DTOs a partir de create DTOs). |
-| `firebase-admin` | ^13.8.0 | SDK de Firebase para entornos servidor. Se usa para verificar tokens JWT (Auth) y acceder a Firestore desde el backend. |
-| `firebase-functions` | ^7.2.5 | SDK para crear Cloud Functions v2. Permite exportar la aplicación NestJS como una función HTTP serverless. |
-| `class-validator` | ^0.15.1 | Librería de validación basada en decoradores. Se usa en los DTOs para validar datos de entrada (email, longitud, tipos). |
-| `class-transformer` | ^0.5.1 | Transforma objetos planos a instancias de clases con tipos. Complementa a class-validator para la serialización de DTOs. |
-| `cors` | ^2.8.6 | Middleware de Express para habilitar CORS (Cross-Origin Resource Sharing), permitiendo que el frontend se comunique con la API. |
-| `otplib` | ^13.4.0 | Implementación de TOTP (Time-based One-Time Password). Se usa para generar y verificar códigos 2FA para el SuperAdmin. |
-| `reflect-metadata` | ^0.2.2 | Polyfill para el API de decoradores experimental de TypeScript. Necesario para que NestJS funcione correctamente. |
-| `rxjs` | ^7.8.1 | Librería de programación reactiva. NestJS la usa internamente para el manejo de streams y observables en peticiones HTTP. |
+| `@nestjs/common` | ^11.0.1 | Módulo principal que provee decoradores de inyección de dependencias (`@Injectable()`, `@Controller()`, etc.). |
+| `@nestjs/core` | ^11.0.1 | Núcleo del framework NestJS para control de ciclo de vida de la aplicación. |
+| `@nestjs/platform-express` | ^11.0.1 | Adaptador para integrar NestJS sobre el servidor HTTP Express. |
+| `firebase-admin` | ^13.8.0 | SDK servidor de Firebase para comunicarse con Firestore y administrar claims JWT. |
+| `firebase-functions` | ^7.2.5 | SDK para crear Cloud Functions v2 y empaquetar la API de NestJS como serverless. |
+| `class-validator` / `class-transformer` | ^0.15.1 / ^0.5.1 | Validación declarativa de DTOs en las peticiones REST. |
+| `otplib` | ^13.4.0 | Generador y verificador de códigos TOTP de 6 dígitos para la seguridad del 2FA. |
+| `cors` | ^2.8.6 | Habilita el intercambio de recursos de origen cruzado para conectar el Frontend. |
 
 ### 2.3 Librerías del Frontend (`frontend/package.json`)
 
 | Librería | Versión | Explicación |
 |----------|---------|-------------|
-| `next` | 16.2.6 | Framework de React con renderizado híbrido (SSR/SSG) y App Router. Proporciona enrutamiento basado en archivos, optimización de imágenes y fonts. |
-| `react` / `react-dom` | 19.2.4 | Librería core de React para construir interfaces de usuario. React 19 incluye el nuevo hook `use()` para promesas. |
-| `firebase` | ^12.13.0 | SDK cliente de Firebase. Se usa para autenticación (signInWithEmailAndPassword, GoogleAuthProvider) desde el navegador. |
-| `lucide-react` | ^1.14.0 | Colección de íconos SVG open-source como componentes React. Se usa en botones, menús y tarjetas de la UI. |
-| `recharts` | ^3.8.1 | Librería de gráficos para React basada en D3. Se usa en el panel SuperAdmin para mostrar gráficos de barras de distribución de planes. |
-| `tailwindcss` | ^4 | Framework CSS utilitario que genera clases atómicas (flex, grid, p-4, text-lg, etc.) directamente en el HTML/JSX. |
-| `@tailwindcss/postcss` | ^4 | Plugin de PostCSS para integrar TailwindCSS v4 en el pipeline de build de Next.js. |
-| `typescript` | ^5 | Superset tipado de JavaScript. Permite definir interfaces (Tenant, Branch, Appointment) y detectar errores en tiempo de compilación. |
-| `eslint` / `eslint-config-next` | ^9 / 16.2.6 | Herramientas de linting que analizan el código en busca de errores, malas prácticas y estilos inconsistentes. |
-| `i18next` | ^23.14.0 | Motor principal de internacionalización (i18n) para gestionar traducción y recursos de idioma. |
-| `react-i18next` | ^14.1.0 | Adaptador para integrar i18next de forma nativa en React mediante hooks de renderizado. |
-| `date-fns` | ^3.6.0 | Colección de utilidades modulares para formatear, comparar y localizar fechas de acuerdo a la cultura activa. |
+| `next` | 16.2.6 | Framework web de React con enrutamiento basado en archivos. |
+| `react` / `react-dom` | 19.2.4 | Librería base para la interfaz reactiva. |
+| `firebase` | ^12.13.0 | SDK cliente para autenticar usuarios directamente desde el navegador. |
+| `lucide-react` | ^1.14.0 | Iconografía SVG ligera e interactiva. |
+| `recharts` | ^3.8.1 | Renderizado de gráficos de barra D3 para visualización de KPIs. |
+| `i18next` / `react-i18next` | ^23.14 / ^14.1 | Motor de internacionalización y hooks de traducción reactivos. |
+| `date-fns` | ^3.6.0 | Formateador localizado de fechas regionales en base al idioma activo. |
 
 ---
 
 ## 3. Instalación y Configuración del Backend (NestJS)
 
 ### 3.1 Prerrequisitos
-
-- Node.js 22+
-- npm 10+
-- Una cuenta de Firebase con proyecto activo
-- Firebase Admin SDK (credenciales de servicio)
+- Node.js 22 o superior e instalador de paquetes `npm`.
+- Proyecto Firebase activo con Firestore y Auth habilitados.
 
 ### 3.2 Creación del Proyecto
-
 ```bash
 # Instalar NestJS CLI globalmente
 npm i -g @nestjs/cli
 
-# Crear el proyecto
-nest new backend
+# Crear la aplicación backend
+nest new backend --no-spec
 cd backend
 ```
 
 ### 3.3 Instalación de Dependencias
-
 ```bash
-# Firebase
-npm install firebase-admin firebase-functions
-
-# Validación de DTOs
-npm install class-validator class-transformer
-
-# Utilidades
-npm install @nestjs/mapped-types
-npm install cors @types/cors
-
-# 2FA
-npm install otplib
-
-# Adaptador Express
-npm install @nestjs/platform-express
+npm install firebase-admin firebase-functions class-validator class-transformer @nestjs/mapped-types cors @types/cors otplib @nestjs/platform-express
 ```
 
 ### 3.4 Configuración de Firebase Admin SDK
 
-Crear el módulo y servicio de Firebase:
+> [!WARNING]
+> Nunca exponga ni suba al control de versiones el archivo de llaves privadas `firebase-config.json`.
 
-```bash
-nest generate module firebase
-nest generate service firebase
-```
+Descargue el archivo de llaves privadas de Firebase Console (Configuración del proyecto > Cuentas de servicio > Generar nueva clave privada) y colóquelo como `firebase-config.json` en `src/firebase/`.
 
-**`src/firebase/firebase.service.ts`** — Servicio wrapper que inicializa Firebase Admin SDK y expone Firestore + Auth:
-
+**`src/firebase/firebase.service.ts`**:
 ```typescript
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as admin from 'firebase-admin';
@@ -197,212 +164,46 @@ export class FirebaseService implements OnModuleInit {
 }
 ```
 
-Colocar el archivo `firebase-config.json` (credenciales de servicio) en `src/firebase/`.
-
-### 3.5 Implementación del AuthGuard (JWT)
-
-```bash
-nest generate guard auth
-```
-
-**`src/auth/auth.guard.ts`** — Guard que verifica tokens JWT usando Firebase Admin SDK:
-
-```typescript
-@Injectable()
-export class AuthGuard implements CanActivate {
-  constructor(private readonly firebaseService: FirebaseService) {}
-
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const authHeader = request.headers.authorization;
-
-    if (!authHeader) {
-      throw new UnauthorizedException('No token provided');
-    }
-
-    const token = authHeader.split(' ')[1]; // Bearer <token>
-    try {
-      const decodedToken = await this.firebaseService.auth.verifyIdToken(token);
-      request['user'] = decodedToken;
-      return true;
-    } catch (error) {
-      throw new UnauthorizedException('Token invalido');
-    }
-  }
-}
-```
-
-### 3.6 Generación de Módulos CRUD
-
-```bash
-nest generate resource tenants --no-spec
-nest generate resource branches --no-spec
-nest generate resource staff --no-spec
-nest generate resource customers --no-spec
-nest generate resource services --no-spec
-nest generate resource appointments --no-spec
-nest generate resource audit-log --no-spec
-```
-
-Cada recurso genera: módulo, controlador, servicio, DTOs (create, update) y entidad.
-
-### 3.7 Estructura de DTOs
-
-Todos los DTOs usan `class-validator` para validar datos de entrada. Ejemplo:
-
-```typescript
-// create-tenant.dto.ts
-export class CreateTenantDto {
-  @IsString()
-  @MinLength(3)
-  name: string;
-
-  @IsString()
-  @Length(11, 11)
-  taxId: string;
-
-  @IsEmail()
-  contactEmail: string;
-
-  @IsOptional()
-  @IsEnum(['STARTUP', 'PRO', 'ENTERPRISE'])
-  plan?: string;
-}
-```
-
-### 3.8 Ejecución Local
-
+### 3.5 Ejecución en Entorno Local
 ```bash
 npm run start:dev
-# Servidor en http://localhost:3000
+# La API se levantará en: http://localhost:3000
 ```
 
 ---
 
 ## 4. Instalación y Configuración del Frontend (Next.js)
 
-### 4.1 Prerrequisitos
-
-- Node.js 22+
-- npm 10+
-- Proyecto Firebase con autenticación habilitada (Email/Password y Google)
-- Web App configurada en Firebase Console
-
-### 4.2 Creación del Proyecto Next.js
-
+### 4.1 Creación del Proyecto
 ```bash
-# Crear proyecto Next.js con App Router
-npx create-next-app@latest frontend
+npx create-next-app@latest frontend --typescript --eslint --tailwind --app --src-dir=false
 cd frontend
-
-# Seleccionar:
-# - TypeScript: Sí
-# - ESLint: Sí
-# - TailwindCSS: Sí (versión 4)
-# - App Router: Sí
 ```
 
-### 4.3 Instalación de Dependencias Adicionales
-
+### 4.2 Instalación de Dependencias
 ```bash
-# Firebase Client SDK (autenticación)
-npm install firebase
-
-# Íconos
-npm install lucide-react
-
-# Gráficos
-npm install recharts
+npm install firebase lucide-react recharts i18next react-i18next date-fns
 ```
 
-### 4.4 Configuración de Firebase Client SDK
-
-Crear archivo de configuración:
-
-**`app/lib/firebase.ts`** — Inicializa Firebase Auth desde variables de entorno:
-
-```typescript
-import { initializeApp, getApps } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-
-let firebaseConfig;
-
-if (process.env.FIREBASE_WEBAPP_CONFIG) {
-  try {
-    firebaseConfig = JSON.parse(process.env.FIREBASE_WEBAPP_CONFIG);
-  } catch (error) {
-    console.error("Error parsing FIREBASE_WEBAPP_CONFIG:", error);
-  }
-}
-
-if (!firebaseConfig) {
-  firebaseConfig = {
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  };
-}
-
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-const auth = getAuth(app);
-
-export { auth };
-```
-
-Crear archivo de entorno:
-
-**`.env.local`** — Variables de entorno con las credenciales de Firebase Web App:
-
+### 4.3 Configuración de Variables de Entorno
+Cree un archivo **`.env.local`** en la raíz de `frontend/` e ingrese los datos de su Web App de Firebase:
 ```env
-NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSyDPvdFRYgKTOFkIXFGXT2x178ycodzp7WM"
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="saasrcb.firebaseapp.com"
-NEXT_PUBLIC_FIREBASE_PROJECT_ID="saasrcb"
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="saasrcb.firebasestorage.app"
+NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSy..."
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="tu-proyecto.firebaseapp.com"
+NEXT_PUBLIC_FIREBASE_PROJECT_ID="tu-proyecto"
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="tu-proyecto.firebasestorage.app"
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="657751849225"
-NEXT_PUBLIC_FIREBASE_APP_ID="1:657751849225:web:0230e02078111e0357bbd8"
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID="G-BHJFR8RHMB"
+NEXT_PUBLIC_FIREBASE_APP_ID="1:657751849225:web:0230e020781"
+NEXT_PUBLIC_API_URL="http://localhost:3000"
 ```
 
-### 4.5 Configuración de TailwindCSS v4
-
-TailwindCSS v4 se configura directamente en el archivo CSS principal:
-
-**`app/globals.css`** — Importa TailwindCSS y define variables de color:
-
-```css
-@import "tailwindcss";
-
-@theme {
-  --color-primary: #e11d48;
-  --color-primary-dark: #be123c;
-  /* ... más colores personalizados */
-}
-```
-
-### 4.6 Configuración de PostCSS
-
-**`postcss.config.mjs`** — Integra TailwindCSS con Next.js:
-
-```javascript
-const config = {
-  plugins: {
-    "@tailwindcss/postcss": {},
-  },
-};
-export default config;
-```
-
-### 4.7 Configuración de Next.js para Exportación Estática
-
-Para el despliegue en Firebase Hosting (solo archivos estáticos), se configura `next.config.ts` con `output: 'export'`:
-
+### 4.4 Configuración de Exportación Estática
+Para realizar el despliegue en Firebase Hosting como sitio web estático optimizado, configure el compilador en **`next.config.ts`**:
 ```typescript
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  output: 'export',
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  output: process.env.NODE_ENV === 'production' ? 'export' : undefined,
   images: {
     unoptimized: true,
   },
@@ -414,373 +215,175 @@ const nextConfig = {
 export default nextConfig;
 ```
 
-Las rutas dinámicas (`[id]`, `[branchId]`) requieren `generateStaticParams` para la exportación estática:
-
-```typescript
-// En cada página con parámetros dinámicos
-export function generateStaticParams() {
-  return [{ id: 'sample' }];
-}
-```
-
-### 4.8 Ejecución Local
-
-```bash
-# Desarrollo
-npm run dev
-# Abrir http://localhost:3000
-
-# Build para producción
-npm run build
-# Genera la carpeta out/
-```
-
-### 4.9 Estructura de Tipos Compartidos
-
-**`app/types/index.ts`** — Interfaces TypeScript que reflejan las colecciones de Firestore:
-
-```typescript
-export type PlanType = 'STARTUP' | 'PRO' | 'ENTERPRISE';
-
-export interface Tenant {
-  id: string;
-  name: string;
-  taxId: string;
-  contactEmail: string;
-  status?: 'ACTIVE' | 'SUSPENDED';
-  plan?: PlanType;
-}
-
-export interface Branch {
-  id: string;
-  name: string;
-  address: string;
-  phone: string;
-  tenantId: string;
-}
-
-export interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  tenantId: string;
-}
-
-export interface Appointment {
-  id: string;
-  customerId?: string;
-  serviceId?: string;
-  staffId?: string;
-  date: string;
-  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED';
-  tenantId: string;
-  branchId?: string;
-  customer?: { id?: string; name: string; email: string; phone: string };
-  branch?: { id: string; name: string; address: string; phone: string };
-  service?: { id: string; name: string; price: number; durationInMinutes: number };
-  staff?: { id: string; name: string; role: string };
-}
-
-export interface Staff {
-  id: string;
-  name: string;
-  role: string;
-  phone: string;
-  tenantId: string;
-}
-
-export interface Service {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  durationInMinutes: number;
-  tenantId: string;
-}
-```
-
 ---
 
-## 5. Modelo de Datos
+## 5. Modelo de Datos (Firestore NoSQL)
 
-El sistema utiliza **Firebase Firestore** (base de datos NoSQL documental) con 7 colecciones principales:
+El sistema almacena la información estructurada en colecciones raíz de Firestore. Las relaciones lógicas se garantizan mediante identificadores indexados (`tenantId`, `branchId`, `customerId`, `serviceId`, `staffId`).
 
-### 5.1 Colecciones
+### 5.1 Diagrama Entidad-Relación Lógico (Mermaid)
 
-| Colección | Descripción | Campos clave |
-|-----------|-------------|--------------|
-| `tenants` | Empresas registradas | name, taxId, contactEmail, plan, status |
-| `branches` | Sucursales por empresa | tenantId, name, address, phone |
-| `staff` | Personal/profesionales | tenantId, name, role, phone |
-| `services` | Servicios del catálogo | tenantId, name, description, price, durationInMinutes |
-| `customers` | Clientes registrados | tenantId, name, email, phone |
-| `appointments` | Citas/reservas | tenantId, branchId, customerId, serviceId, staffId, date, status |
-| `audit-log` | Registro de auditoría | action, entity, entityId, performedBy, timestamp |
-
-### 5.2 Relaciones
-
-```
-Tenant (1) ──→ (N) Branches
-Tenant (1) ──→ (N) Staff
-Tenant (1) ──→ (N) Services
-Tenant (1) ──→ (N) Customers
-Tenant (1) ──→ (N) Appointments
-Branch  (1) ──→ (N) Appointments
-Customer (1) ──→ (N) Appointments
-Service  (1) ──→ (N) Appointments
-Staff    (1) ──→ (N) Appointments
+```mermaid
+erDiagram
+    TENANT ||--o{ BRANCH : "posee"
+    TENANT ||--o{ STAFF : "contrata"
+    TENANT ||--o{ SERVICE : "ofrece"
+    TENANT ||--o{ CUSTOMER : "registra"
+    TENANT ||--o{ APPOINTMENT : "almacena"
+    BRANCH ||--o{ APPOINTMENT : "aloja"
+    CUSTOMER ||--o{ APPOINTMENT : "solicita"
+    SERVICE ||--o{ APPOINTMENT : "detalla"
+    STAFF ||--o{ APPOINTMENT : "atiende"
 ```
 
-Todas las consultas se filtran por `tenantId` para garantizar el aislamiento de datos entre empresas (multi-tenant).
+### 5.2 Estructura Documental
 
-### 5.3 Operaciones en Cascada
+#### Colección: `tenants`
+```json
+{
+  "id": "tenant_123",
+  "name": "Salon Antuane",
+  "taxId": "20123456789",
+  "contactEmail": "admin@antuane.com",
+  "status": "ACTIVE",
+  "plan": "PRO",
+  "createdAt": "2026-06-25T21:30:00Z"
+}
+```
 
-Al cambiar el estado de un tenant a `SUSPENDED` o eliminarlo, las operaciones se propagan a todos los recursos relacionados (branches, staff, services, customers, appointments) mediante Firestore queries batch.
+#### Colección: `appointments`
+```json
+{
+  "id": "appointment_999",
+  "tenantId": "tenant_123",
+  "date": "2026-06-30T10:00:00.000Z",
+  "status": "PENDING",
+  "customer": {
+    "name": "Gustavo Flores",
+    "email": "gustavo@gmail.com",
+    "phone": "994001234"
+  },
+  "branch": {
+    "id": "branch_456",
+    "name": "Sede Miraflores",
+    "address": "Av. Larco 123",
+    "phone": "999888777"
+  },
+  "service": {
+    "id": "service_789",
+    "name": "Corte de Cabello Premium",
+    "price": 60.00,
+    "durationInMinutes": 45
+  },
+  "staff": {
+    "id": "staff_111",
+    "name": "Carlos Barber",
+    "role": "Estilista Senior"
+  }
+}
+```
 
 ---
 
 ## 6. Endpoints de la API REST
 
-### 6.1 Autenticación
+Todas las peticiones del panel administrativo requieren la cabecera `Authorization: Bearer <JWT_TOKEN>`.
 
-| Método | Ruta | Auth | Descripción |
-|--------|------|------|-------------|
-| POST | `/auth/password-changed` | JWT | Marca que el usuario cambió su contraseña inicial |
-| POST | `/auth/2fa/generate` | JWT | Genera un secreto TOTP para 2FA |
-| POST | `/auth/2fa/verify` | JWT | Verifica un código TOTP de 6 dígitos |
+### 🔐 Autenticación y 2FA
+- `POST /auth/password-changed` — Informa al servidor del cambio de clave obligatoria del tenant.
+- `POST /auth/2fa/generate` — Genera la clave secreta TOTP en formato base32 para vincular Google Authenticator.
+- `POST /auth/2fa/verify` — Valida el token de 2FA y autoriza el inicio de sesión del SuperAdmin.
 
-### 6.2 Tenants (Empresas)
+### 🏢 Tenants (Empresas)
+- `GET /tenants` — Lista todas las empresas (Solo SuperAdmin).
+- `GET /tenants/:id` — Recupera la información de un tenant por ID.
+- `POST /tenants` — Registra un tenant, genera una cuenta en Firebase Auth con claim `role: 'EMPRESA'` y devuelve una clave temporal aleatoria.
+- `PATCH /tenants/:id` — Modifica datos del tenant. Si el estado cambia a `SUSPENDED`, deshabilita el acceso de forma restrictiva.
+- `DELETE /tenants/:id` — Remueve el tenant y elimina en cascada todos sus documentos relacionados en Firestore.
 
-| Método | Ruta | Auth | Descripción |
-|--------|------|------|-------------|
-| GET | `/tenants` | JWT | Listar todas las empresas |
-| GET | `/tenants/:id` | JWT | Obtener empresa por ID |
-| POST | `/tenants` | JWT | Crear empresa + usuario Firebase Auth + rol EMPRESA |
-| PATCH | `/tenants/:id` | JWT | Actualizar empresa (cambios de estado en cascada) |
-| DELETE | `/tenants/:id` | JWT | Eliminar empresa (borrado en cascada) |
-
-### 6.3 Branches (Sucursales)
-
-| Método | Ruta | Query Params | Descripción |
-|--------|------|-------------|-------------|
-| GET | `/branches` | ?tenantId=X | Listar sucursales por tenant |
-| POST | `/branches` | — | Crear sucursal |
-| DELETE | `/branches/:id` | — | Eliminar sucursal |
-
-### 6.4 Staff (Personal)
-
-| Método | Ruta | Query Params | Descripción |
-|--------|------|-------------|-------------|
-| GET | `/staff` | ?tenantId=X | Listar personal por tenant |
-| POST | `/staff` | — | Crear personal |
-
-### 6.5 Services (Servicios)
-
-| Método | Ruta | Query Params | Descripción |
-|--------|------|-------------|-------------|
-| GET | `/services` | ?tenantId=X | Listar servicios por tenant |
-| POST | `/services` | — | Crear servicio |
-
-### 6.6 Customers (Clientes)
-
-| Método | Ruta | Query Params | Descripción |
-|--------|------|-------------|-------------|
-| GET | `/customers` | ?tenantId=X | Listar clientes por tenant |
-| POST | `/customers` | — | Crear cliente |
-
-### 6.7 Appointments (Citas)
-
-| Método | Ruta | Query Params | Descripción |
-|--------|------|-------------|-------------|
-| GET | `/appointments` | ?tenantId=X&branchId=Y&customerEmail=Z | Listar citas con filtros |
-| POST | `/appointments` | — | Crear cita (soporta JSON plano y anidado) |
-
-### 6.8 Audit Log
-
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/audit-log` | Listar registros de auditoría |
-| POST | `/audit-log` | Crear registro de auditoría |
+### 📍 Sucursales y Recursos
+- `GET /branches?tenantId=X` — Lista sucursales de la empresa.
+- `POST /branches` — Registra una sede de atención.
+- `GET /services?tenantId=X` — Lista servicios ofertados.
+- `POST /services` — Crea servicios en el catálogo.
+- `GET /appointments?tenantId=X&customerEmail=Y` — Lista citas filtradas dinámicamente.
+- `POST /appointments` — Inserta reservas asociadas a los salones.
 
 ---
 
 ## 7. Componentes del Frontend
 
-El frontend consta de **13 páginas (vistas)** desarrolladas con Next.js App Router, todas como Client Components (`'use client'`). Se comunican con el backend mediante fetch a la API REST.
+La interfaz del frontend está estructurada bajo el patrón **Client Components** utilizando el enrutamiento de Next.js App Router.
 
-### 7.1 Listado de Vistas
+### 7.1 Diagrama de Secuencia de Autenticación y Redirección (Mermaid)
 
-| Ruta | Componente | Funcionalidad |
-|------|-----------|---------------|
-| `/` | `SuperAdminPanel` | Dashboard SuperAdmin: KPIs (total tenants, activos, enterprise), gráfico de barras por plan (Recharts), tabla CRUD de tenants con edición inline, modal de creación, exportación CSV, modal de credenciales |
-| `/login` | `LoginPage` | Inicio de sesión con Email/Password y Google Sign-In. Redirección por rol: EMPRESA → `/tenant/:id`, SUPER_ADMIN → `/login/verify-2fa`, cliente → `/customer/dashboard` |
-| `/login/change-password` | `ChangePasswordPage` | Forzar cambio de contraseña si el Custom Claim `requiresPasswordChange` está activo. Llama a `POST /auth/password-changed` |
-| `/login/verify-2fa` | `Verify2FAPage` | Verificación TOTP de 6 dígitos para SuperAdmin. Incluye flujo de setup con QR y llamadas a `/auth/2fa/generate` y `/auth/2fa/verify` |
-| `/customer/dashboard` | `CustomerDashboard` | Portal del cliente: wizard de reserva en 6 pasos (tenant → branch → service → staff → datetime → confirmar), historial de citas, perfil del usuario |
-| `/tenant/[id]` | `TenantAdminPanel` | Dashboard de empresa: gestión de sucursales (formulario + tarjetas), enlaces a secciones de staff, servicios, clientes y citas |
-| `/tenant/[id]/staff` | `StaffPage` | CRUD de personal: formulario de creación (name, role, phone) + tabla listando personal del tenant |
-| `/tenant/[id]/services` | `ServicesPage` | CRUD de servicios: formulario (name, description, price, duration) + tabla con precios y duración |
-| `/tenant/[id]/customers` | `CustomersPage` | CRUD de clientes: formulario (name, email, phone) + tabla listando clientes |
-| `/tenant/[id]/appointments` | `AppointmentsPage` | Gestión de citas: formulario con selects (cliente, servicio, staff) + tabla con estados (PENDING, CONFIRMED, CANCELLED) |
-| `/tenant/[id]/branches` | `BranchesRedirect` | Redirecciona automáticamente a `/tenant/[id]` |
-| `/tenant/[id]/branches/[branchId]` | `BranchSettings` | Configuración de sucursal: editor de horarios semanales (inputs de hora por día), toggles activo/inactivo |
-
-### 7.2 Ejemplo de Flujo: Login con Redirección por Rol
-
-```typescript
-// login/page.tsx - Lógica de autenticación
-const handleEmailLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
-  const userCredential = await signInWithEmailAndPassword(auth, email, password);
-  const token = await userCredential.user.getIdTokenResult();
-
-  const role = token.claims.role;
-  const tenantId = token.claims.tenantId;
-
-  if (role === 'EMPRESA') {
-    router.push(`/tenant/${tenantId}`);
-  } else if (role === 'SUPER_ADMIN') {
-    router.push('/login/verify-2fa');
-  } else {
-    router.push('/customer/dashboard');
-  }
-};
+```mermaid
+sequenceDiagram
+    autonumber
+    Usuario->>LoginPage (Client): Ingresa Credenciales
+    LoginPage (Client)->>Firebase Auth: signInWithEmailAndPassword
+    Firebase Auth-->>LoginPage (Client): Retorna UserCredential (JWT)
+    LoginPage (Client)->>Firebase Auth: getIdTokenResult() (Decodifica Custom Claims)
+    
+    alt Claim role == 'SUPER_ADMIN'
+        LoginPage (Client)->>Verify2FAPage: Redirige a /login/verify-2fa
+        Verify2FAPage->>API REST: POST /auth/2fa/verify
+        API REST-->>Verify2FAPage: OTP Válido
+        Verify2FAPage->>SuperAdminPanel: Redirige a / (Dashboard Maestro)
+    else Claim role == 'EMPRESA'
+        LoginPage (Client)->>TenantAdminPanel: Redirige a /tenant/[tenantId]
+    else Claim role == 'CLIENTE'
+        LoginPage (Client)->>CustomerDashboard: Redirige a /customer/dashboard
+    end
 ```
 
-### 7.3 Ejemplo de Consumo de API
+### 7.2 Mapeo de Vistas en el App Router
 
-```typescript
-// page.tsx (SuperAdminPanel) - Obtener tenants
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-
-const fetchTenants = async () => {
-  const user = auth.currentUser;
-  const token = await user?.getIdToken();
-  const res = await fetch(`${API_URL}/tenants`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const data = await res.json();
-  setTenants(data);
-};
-```
+| Ruta del Archivo | URL de Acceso | Componente Principal | Funcionalidad |
+|------------------|---------------|----------------------|---------------|
+| `app/page.tsx` | `/` | `SuperAdminPanel` | Dashboard Maestro de KPIs globales, gráficos con Recharts y CRUD de Tenants con exportación a CSV. |
+| `app/login/page.tsx` | `/login` | `LoginPage` | Autenticación integrada de Firebase con redirección selectiva por Claims de rol. |
+| `app/login/verify-2fa/page.tsx` | `/login/verify-2fa` | `Verify2FAPage` | Pantalla de validación OTP y vinculación de código QR para SuperAdmin. |
+| `app/customer/dashboard/page.tsx`| `/customer/dashboard`| `CustomerDashboard` | Portal del cliente. Contiene las reservas agendadas del usuario y el Wizard interactivo de reserva en 6 pasos. |
+| `app/tenant/[id]/page.tsx` | `/tenant/[id]` | `TenantAdminPanel` | Panel administrativo de la Empresa para el control de sedes de atención. |
+| `app/tenant/[id]/staff/page.tsx` | `/tenant/[id]/staff` | `StaffPage` | Catálogo de estilistas y roles por tenant. |
 
 ---
 
 ## 8. Pruebas con SoapUI
 
-Para validar el correcto funcionamiento de la API REST, se empleó **SoapUI** como cliente REST.
+Para validar el funcionamiento del AuthGuard y la serialización JSON de los controladores, se configuró un proyecto REST en **SoapUI**.
 
-### 8.1 Obtención del Token JWT
-
-El token JWT se obtiene desde Firebase Auth. En desarrollo, se obtiene desde la consola del navegador:
-
-```javascript
-// En la consola del navegador después de iniciar sesión
-const user = firebase.auth().currentUser;
-const token = await user.getIdToken();
-console.log(token);
-// Copiar este token para usar en SoapUI
-```
-
-### 8.2 Listar Empresas (GET /tenants)
-
-**Solicitud:**
-```
-GET http://localhost:3000/tenants
+### 8.1 Autenticación (Paso de Token JWT)
+Las cabeceras se ingresan en la pestaña **Headers** de la petición en SoapUI:
+```http
 Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-**Respuesta:**
+### 8.2 Creación de Tenant (`POST /tenants`)
+**Cuerpo de la Petición (JSON):**
 ```json
-[
-  {
-    "id": "abc123",
-    "name": "Salon Antuane",
-    "taxId": "20123456789",
-    "contactEmail": "admin@antuane.com",
-    "status": "ACTIVE",
-    "plan": "PRO",
-    "createdAt": "2026-05-15T10:30:00.000Z"
-  }
-]
-```
-
-### 8.3 Crear Empresa (POST /tenants)
-
-**Solicitud:**
-```
-POST http://localhost:3000/tenants
-Authorization: Bearer eyJhbGciOiJSUzI1NiJ9...
-Content-Type: application/json
-
 {
-  "name": "Beauty Studio Lima",
-  "taxId": "20567891234",
-  "contactEmail": "admin@beautystudio.pe",
-  "plan": "STARTUP"
+  "name": "Barbería Classic",
+  "taxId": "20987654321",
+  "contactEmail": "contacto@classicbarber.pe",
+  "plan": "PRO"
 }
 ```
 
-**Respuesta (incluye credenciales generadas automáticamente):**
+**Respuesta Exitosa (201 Created):**
 ```json
 {
-  "id": "def456",
-  "name": "Beauty Studio Lima",
-  "taxId": "20567891234",
-  "contactEmail": "admin@beautystudio.pe",
+  "id": "8yG9xKj2sL01",
+  "name": "Barbería Classic",
+  "taxId": "20987654321",
+  "contactEmail": "contacto@classicbarber.pe",
   "status": "ACTIVE",
-  "plan": "STARTUP",
+  "plan": "PRO",
   "credentials": {
-    "email": "admin@beautystudio.pe",
+    "email": "contacto@classicbarber.pe",
     "password": "k7m2p9x4q1A1!"
   }
-}
-```
-
-### 8.4 Actualizar Empresa (PATCH /tenants/:id)
-
-```
-PATCH http://localhost:3000/tenants/def456
-Authorization: Bearer eyJhbGciOiJSUzI1NiJ9...
-Content-Type: application/json
-
-{
-  "plan": "PRO",
-  "name": "Beauty Studio Premium"
-}
-```
-
-### 8.5 Eliminar Empresa (DELETE /tenants/:id)
-
-```
-DELETE http://localhost:3000/tenants/def456
-Authorization: Bearer eyJhbGciOiJSUzI1NiJ9...
-```
-
-**Respuesta:**
-```json
-{
-  "id": "def456",
-  "deleted": true
-}
-```
-
-### 8.6 Validación de Seguridad
-
-La API rechaza peticiones sin autenticación con HTTP 401:
-
-```
-GET http://localhost:3000/tenants
-(Sin header Authorization)
-```
-
-**Respuesta:**
-```json
-{
-  "statusCode": 401,
-  "message": "No se proporciono un token de autorizacion",
-  "error": "Unauthorized"
 }
 ```
 
@@ -788,105 +391,39 @@ GET http://localhost:3000/tenants
 
 ## 9. Despliegue en Firebase
 
-### 9.1 Arquitectura de Despliegue
+### 9.1 Arquitectura Serverless
+El ecosistema completo se aloja en los servidores globales de Google Cloud Platform (GCP) mediante la CLI de Firebase:
+- **Backend:** NestJS empaquetado como Firebase Cloud Functions v2 (HTTP Serverless).
+- **Frontend:** Next.js exportado estáticamente y servido en Firebase Hosting CDN.
+- **Base de Datos:** Cloud Firestore.
 
-- **Backend**: Firebase Cloud Functions v2 (NestJS empaquetado como función HTTP)
-- **Frontend**: Firebase Hosting (Next.js exportado como sitio estático)
-- **Base de datos**: Firebase Firestore (NoSQL)
-- **Autenticación**: Firebase Auth
-
-### 9.2 Configuración de Firebase
-
-**`.firebaserc`:**
-```json
-{
-  "projects": {
-    "default": "saasrcb"
-  }
-}
-```
-
-**`firebase.json`:**
-```json
-{
-  "functions": [
-    {
-      "codebase": "default",
-      "source": "backend",
-      "ignore": ["node_modules", ".git", "firebase-debug.log", "firestore-debug.log"],
-      "predeploy": ["npm --prefix backend run build"]
-    }
-  ],
-  "hosting": {
-    "site": "glamysaas",
-    "public": "frontend/out",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "rewrites": [
-      { "source": "**", "destination": "/index.html" }
-    ]
-  }
-}
-```
-
-### 9.3 Despliegue del Backend (Cloud Functions)
-
+### 9.2 Despliegue del Backend (Cloud Functions)
 ```bash
-# Build del backend
 cd backend
 npm run build
-cd ..
-
-# Desplegar Cloud Functions
 firebase deploy --only functions
 ```
 
-El backend se despliega como una Cloud Function v2 con:
-- Memoria: 512 MiB
-- Acceso: público (`invoker: 'public'`)
-- CORS: habilitado globalmente
-- URL: `https://api-<hash>-<region>.cloudfunctions.net/api`
-
-### 9.4 Despliegue del Frontend (Hosting)
-
+### 9.3 Despliegue del Frontend (Hosting)
 ```bash
-# Build del frontend (genera frontend/out/)
 cd frontend
 npm run build
-cd ..
-
-# Desplegar a Firebase Hosting
 firebase deploy --only hosting
 ```
-
-URL del frontend: **https://glamysaas.web.app**
-
-### 9.5 Variables de Entorno para Producción
-
-Para el frontend en producción, las variables de entorno de Firebase se incluyen en el build mediante `next.config.ts` (`env.FIREBASE_WEBAPP_CONFIG`). Las variables `NEXT_PUBLIC_*` se incorporan en tiempo de build.
 
 ---
 
 ## 10. Conclusiones
 
-1. La autenticación mediante JWT (Firebase Auth con Custom Claims) se implementó correctamente, permitiendo un acceso seguro y diferenciado por roles (SUPER_ADMIN, EMPRESA, Cliente) a los recursos de la API REST.
-
-2. Todas las operaciones CRUD sobre los recursos fueron probadas exitosamente mediante SoapUI, incluyendo la generación automática de credenciales al crear una empresa.
-
-3. Se comprobó que el sistema rechaza las solicitudes no autenticadas con respuesta HTTP 401, validando la seguridad del endpoint protegido con AuthGuard.
-
-4. La arquitectura multi-tenant garantiza el aislamiento de datos entre empresas mediante el campo `tenantId` en todas las consultas a Firestore.
-
-5. El frontend en Next.js 16 con React 19 y TailwindCSS 4 proporciona una interfaz moderna y responsiva con 13 vistas funcionales que consumen la API REST.
-
-6. El despliegue del backend en Firebase Cloud Functions v2 y del frontend en Firebase Hosting permite una arquitectura serverless escalable sin gestión de infraestructura.
-
-7. El uso de `output: 'export'` en Next.js permite generar un sitio estático desplegable en cualquier hosting CDN, incluyendo Firebase Hosting.
+1. **Aislamiento Multitenant Robusto:** La arquitectura diseñada aísla las transacciones comerciales por tenant utilizando consultas indexadas por `tenantId` en Firestore, garantizando seguridad y confidencialidad en los datos de los salones.
+2. **Ciclo de Vida en Cascada:** La implementación de disparadores por lotes (Batch updates) en NestJS asegura que las bajas o suspensiones de empresas impacten en cascada y de manera atómica a sucursales, citas y personal, previniendo la persistencia de huérfanos.
+3. **Control de Acceso Riguroso:** El uso de Custom Claims en JWT emitidos por Firebase Auth valida los perfiles directamente en el router, rechazando intentos de suplantación en milisegundos con códigos HTTP 401.
 
 ---
 
 ## 11. Práctica: Internacionalización (i18n) y Localización (l10n)
 
-Se ha desarrollado un ecosistema completo de **Internacionalización (i18n)** y **Localización (l10n)** en el cliente para el frontend de **Glamy SaaS**. Esto permite adaptar dinámicamente toda la experiencia de usuario (incluyendo traducción de etiquetas, validación de formularios, visualización de alertas, formato de divisas regionales, fechas y números) a 4 lenguajes y regiones distintas:
+Se ha integrado un sistema completo de **Internacionalización (i18n)** y **Localización (l10n)** en el cliente para el frontend de **Glamy SaaS**. Esto permite adaptar dinámicamente toda la experiencia de usuario (incluyendo traducción de etiquetas, validación de formularios, visualización de alertas, formato de divisas regionales, fechas y números) a 4 lenguajes y regiones distintas:
 - 🇪🇸 **Español (`es`)** — Divisa: Soles Peruanos (`PEN`), formato: `S/. 150.00`
 - 🇺🇸 **Inglés (`en`)** — Divisa: Dólares Americanos (`USD`), formato: `$150.00`
 - 🇧🇷 **Portugués (`pt`)** — Divisa: Reales Brasileños (`BRL`), formato: `R$ 150,00`
@@ -979,10 +516,9 @@ Para facilitar la revisión por parte del profesor, se diseñó la ruta interact
 
 ---
 
-## Enlaces
+## 13. Enlaces de Interés
 
 - **Frontend en Producción (Firebase):** https://glamysaas.web.app
 - **Laboratorio de Pruebas de i18n/l10n:** http://localhost:3000/test-i18n
 - **Repositorio GitHub de Avance:** https://github.com/Gustavo99400/SaaSBll.git
 - **Proyecto de Consola Firebase:** saasrcb
-
